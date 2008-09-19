@@ -399,7 +399,7 @@ class OMeta
 	def initialize_hook
 	end
 
-	// #match:with: and #matchAll:with: are a grammar's "public interface"
+	# #match:with: and #matchAll:with: are a grammar's "public interface"
 	def self.genericMatch(input, rule, *args)
 		m = new(input)
 		e = nil
@@ -473,12 +473,11 @@ class OMeta
 			raise e, message #, $@
 		end
 	end
-end
 
-# this doesn't really belong here. mostly a relic of the javascript port
-class String
-	def toProgramString
-		inspect
+	ESCAPE_LOOKUP = {'n' => "\n", 't' => "\t", 'r' => "\r", '\'' => "'", '\"' => '"', '\\' => '\\'}
+
+	def unescapeChar c
+		ESCAPE_LOOKUP[c] or raise NotImplementedError
 	end
 end
 
