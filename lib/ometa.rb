@@ -7,6 +7,6 @@ class OMeta
     bsruby_translator ometa_parser ometa_translator)
 
   GRAMMAR_FILES.collect! do |name|
-    File.expand_path(File.dirname(__FILE__) + "/../grammars/#{name}.ometa")
+    File.expand_path(File.dirname(__FILE__) + "/../ometa/#{name}.ometa")
   end
 end
