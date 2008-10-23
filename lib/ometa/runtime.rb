@@ -166,12 +166,14 @@ class OMeta
   def _apply(rule)
     #p rule
     memoRec = @input.memo[rule]
-    if not memoRec
+    if not memoRec then
       oldInput = @input
       lr = LeftRecursion.new
       @input.memo[rule] = memoRec = lr
+
       # should these be copies too?
-      @input.memo[rule] = memoRec = {:ans => method(rule).call, :nextInput => @input}
+      @input.memo[rule] = memoRec = { :ans => send(rule), :nextInput => @input }
+
       if lr.detected
         sentinel = @input
         while true
@@ -179,7 +181,7 @@ class OMeta
             @input = oldInput
             ans = send rule
             raise Fail if @input == sentinel
-            oldInput.memo[rule] = memoRec = {:ans => ans, :nextInput => @input}
+            oldInput.memo[rule] = memoRec = { :ans => ans, :nextInput => @input}
           rescue Fail
             break
           end
@@ -187,7 +189,7 @@ class OMeta
       end
     elsif LeftRecursion === memoRec
       memoRec.detected = true
-      raise Fail #throw :fail, true
+      raise Fail
     end
     @input = memoRec[:nextInput]
     return memoRec[:ans]
@@ -414,7 +416,8 @@ class OMeta
     end
     #e = Fail.new
     e.matcher = m
-    e.message.replace "Unable to match at pos #{m.input.instance_variable_get(:@stream).pos.inspect}"
+    pos = m.input.instance_variable_get(:@stream).pos.inspect
+    e.message.replace "Unable to match at pos #{pos}"
     raise e
   end
 
