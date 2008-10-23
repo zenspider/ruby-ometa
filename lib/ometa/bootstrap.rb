@@ -1,4 +1,5 @@
 # Automatically generated. DO NOT MODIFY.
+
 NullOptimizer = Class.new(OMeta) do
 @name = "NullOptimizer"
 def setHelped
