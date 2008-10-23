@@ -1,6 +1,6 @@
 require "rake/testtask"
 
-$:.unshift File.dirname(__FILE__) + '/lib'
+$:.unshift 'lib'
 require 'ometa'
 
 desc 'rebuild bootstrap.rb from the core ometa grammar files'
@@ -12,6 +12,11 @@ task :bootstrap do
     f.puts
     f.puts(ruby)
   end
+end
+
+desc "basic bootstrap profiling"
+task :profile do
+  sh 'zenprofile -Ilib -rometa -e "Bootstrapper.to_ruby(OMeta::GRAMMAR_FILES)"'
 end
 
 desc 'Simple benchmark'
