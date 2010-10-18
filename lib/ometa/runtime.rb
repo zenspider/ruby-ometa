@@ -160,7 +160,7 @@ end
 #// the OMeta "class" and basic functionality
 #// TODO: make apply support indirect left recursion
 
-class OMeta
+class OMetaCore
   attr_reader :input
 
   def _apply(rule)
