@@ -56,7 +56,6 @@ module Bootstrapper
 
         # that gives us its name
         name = klass.instance_variable_get(:@name)
-
         "#{name} = #{ruby}"
       end
     end
