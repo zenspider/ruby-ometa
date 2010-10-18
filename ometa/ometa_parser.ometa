@@ -1,6 +1,6 @@
 
 ometa OMetaParser <: OMeta {
-  nameFirst      = '_' | '$' | letter,
+  nameFirst      = <_$> | letter,
   nameRest       = nameFirst | digit,
   tsName         = firstAndRest('"nameFirst"', '"nameRest"'):xs        -> { xs.join('') },
   name           = spaces tsName,
@@ -36,6 +36,7 @@ ometa OMetaParser <: OMeta {
                    | keyword('"true"')      | keyword('"false"') ):x   -> { ['App', 'exactly', x] }
                  | spaces (characters | sCharacters | string | number)
                  | "[" expr:x "]"                                      -> { ['Form', x] }
+                 | "<" (~">" eChar)+:x  ">"                            -> { ['App', 'regch', x.join('').inspect] }
                  | "(" expr:x ")"                                      -> { x },
   ruleName       = name
                  | spaces tsString,

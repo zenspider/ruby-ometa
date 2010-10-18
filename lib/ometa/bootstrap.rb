@@ -2,6 +2,10 @@
 
 OMeta = Class.new(OMetaCore) do
 @name = "OMeta"
+def regch
+regex = c = nil
+(regex = _apply("anything");c = _apply("char");_pred(Regexp.new("[#{regex}]").match(c) ))
+end
 end
 
 NullOptimizer = Class.new(OMeta) do
@@ -282,8 +286,8 @@ _or(proc { (_applyWithArgs("token", "~");x = _apply("expr2"); ['Not',         x]
 end
 
 def expr1
-x = x = x = nil
-_or(proc { _apply("application") }, proc { _apply("semAction") }, proc { _apply("semPred") }, proc { (x = _or(proc { _applyWithArgs("keyword", "undefined") }, proc { _applyWithArgs("keyword", "nil") }, proc { _applyWithArgs("keyword", "true") }, proc { _applyWithArgs("keyword", "false") }); ['App', 'exactly', x] ) }, proc { (_apply("spaces");_or(proc { _apply("characters") }, proc { _apply("sCharacters") }, proc { _apply("string") }, proc { _apply("number") })) }, proc { (_applyWithArgs("token", "[");x = _apply("expr");_applyWithArgs("token", "]"); ['Form', x] ) }, proc { (_applyWithArgs("token", "(");x = _apply("expr");_applyWithArgs("token", ")"); x ) })
+x = x = x = x = nil
+_or(proc { _apply("application") }, proc { _apply("semAction") }, proc { _apply("semPred") }, proc { (x = _or(proc { _applyWithArgs("keyword", "undefined") }, proc { _applyWithArgs("keyword", "nil") }, proc { _applyWithArgs("keyword", "true") }, proc { _applyWithArgs("keyword", "false") }); ['App', 'exactly', x] ) }, proc { (_apply("spaces");_or(proc { _apply("characters") }, proc { _apply("sCharacters") }, proc { _apply("string") }, proc { _apply("number") })) }, proc { (_applyWithArgs("token", "[");x = _apply("expr");_applyWithArgs("token", "]"); ['Form', x] ) }, proc { (_applyWithArgs("token", "<");x = _xmany1 { (_xnot { _applyWithArgs("token", ">") };_apply("eChar")) };_applyWithArgs("token", ">"); ['App', 'regch', x.join('').inspect] ) }, proc { (_applyWithArgs("token", "(");x = _apply("expr");_applyWithArgs("token", ")"); x ) })
 end
 
 def ruleName
