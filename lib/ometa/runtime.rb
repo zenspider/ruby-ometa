@@ -293,15 +293,7 @@ class OMetaCore
     return r
   end
 
-  def end
-    _xnot { _apply("anything") }
-  end
-
-  def empty
-    return true
-  end
-
-  def apply
+	def apply
     _apply _apply('anything')
   end
 
@@ -323,52 +315,6 @@ class OMetaCore
       return wanted
     end
     raise Fail #throw :fail, true
-  end
-
-  def char
-    r = _apply("anything")
-    _pred(Character === r)
-    return r
-  end
-
-  def space
-    r = _apply("char")
-    _pred(r[0] <= 32)
-    return r
-  end
-
-  def spaces
-    _xmany { _apply("space") }
-  end
-
-  def digit
-    r = _apply("char")
-    _pred(r =~ /[0-9]/)
-    return r
-  end
-
-  def lower
-    r = _apply("char")
-    _pred(r =~ /[a-z]/)
-    return r
-  end
-
-  def upper
-    r = _apply("char")
-    _pred(r =~ /[A-Z]/)
-    return r
-  end
-
-  def letter
-    _or(
-        proc { _apply 'lower' },
-        proc { _apply 'upper' })
-  end
-
-  def letterOrDigit
-    _or(
-        proc { _apply 'letter' },
-        proc { _apply 'digit' })
   end
 
   def firstAndRest

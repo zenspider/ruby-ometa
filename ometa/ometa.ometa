@@ -1,3 +1,23 @@
 ometa OMeta <: OMetaCore{
-	regch :regex = char:c ?{Regexp.new("[#{regex}]").match(c) } 
+	regch :regex = char:c ?{Regexp.new("[#{regex}]").match(c)} -> {c}
+,
+	end= ~anything
+,
+	empty = -> {true}
+,
+	char= anything:c ?{Character === c } -> {c}
+,
+	space=char:c ?{c[0]<=32} -> {c}
+,
+	spaces=space* 
+,
+	digit=<0-9>
+,
+	lower=<a-z>
+,
+	upper=<A-Z>
+,
+	letter=lower | upper
+,
+	letterOrDigit=letter | digit
 }

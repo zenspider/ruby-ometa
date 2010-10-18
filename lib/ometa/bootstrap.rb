@@ -4,7 +4,57 @@ OMeta = Class.new(OMetaCore) do
 @name = "OMeta"
 def regch
 regex = c = nil
-(regex = _apply("anything");c = _apply("char");_pred(Regexp.new("[#{regex}]").match(c) ))
+(regex = _apply("anything");c = _apply("char");_pred(Regexp.new("[#{regex}]").match(c));c)
+end
+
+def end
+
+_xnot { _apply("anything") }
+end
+
+def empty
+
+true
+end
+
+def char
+c = nil
+(c = _apply("anything");_pred(Character === c );c)
+end
+
+def space
+c = nil
+(c = _apply("char");_pred(c[0]<=32);c)
+end
+
+def spaces
+
+_xmany { _apply("space") }
+end
+
+def digit
+
+_applyWithArgs("regch", "0-9")
+end
+
+def lower
+
+_applyWithArgs("regch", "a-z")
+end
+
+def upper
+
+_applyWithArgs("regch", "A-Z")
+end
+
+def letter
+
+_or(proc { _apply("lower") }, proc { _apply("upper") })
+end
+
+def letterOrDigit
+
+_or(proc { _apply("letter") }, proc { _apply("digit") })
 end
 end
 
@@ -177,7 +227,7 @@ OMetaParser = Class.new(OMeta) do
 @name = "OMetaParser"
 def nameFirst
 
-_or(proc { _applyWithArgs("exactly", "_") }, proc { _applyWithArgs("exactly", "$") }, proc { _apply("letter") })
+_or(proc { _applyWithArgs("regch", "_$") }, proc { _apply("letter") })
 end
 
 def nameRest
