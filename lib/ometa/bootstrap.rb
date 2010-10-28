@@ -2,9 +2,19 @@
 
 OMeta = Class.new(OMetaCore) do
 @name = "OMeta"
+def _dot_
+
+_apply("anything")
+end
+
 def regch
 regex = c = nil
 (regex = _apply("anything");c = _apply("char");_pred(Regexp.new("[#{regex}]").match(c));c)
+end
+
+def perhaps
+expr = nil
+(expr = _apply("anything");_or(proc { (_apply("apply");_apply("expr")) }, proc { _apply("empty") }))
 end
 
 def end
@@ -15,6 +25,11 @@ end
 def empty
 
 true
+end
+
+def endline
+
+_or(proc { (_xmany1 { _applyWithArgs("token", "\r") };_applyWithArgs("token", "\n")) }, proc { _applyWithArgs("token", "\r") }, proc { _applyWithArgs("token", "\n") })
 end
 
 def char
@@ -227,7 +242,7 @@ OMetaParser = Class.new(OMeta) do
 @name = "OMetaParser"
 def nameFirst
 
-_or(proc { _applyWithArgs("regch", "_$") }, proc { _apply("letter") })
+_or(proc { _applyWithArgs("regch", "_$.^") }, proc { _apply("letter") })
 end
 
 def nameRest
@@ -237,7 +252,7 @@ end
 
 def tsName
 xs = nil
-(xs = _applyWithArgs("firstAndRest", "nameFirst", "nameRest"); xs.join('') )
+(xs = _applyWithArgs("firstAndRest", "nameFirst", "nameRest"); leterize(xs.join('')) )
 end
 
 def name
@@ -322,7 +337,7 @@ end
 
 def optIter
 x = nil
-(x = _apply("anything");_or(proc { (_applyWithArgs("token", "*"); ['Many',        x] ) }, proc { (_applyWithArgs("token", "+"); ['Many1',       x] ) }, proc { (_apply("empty"); x ) }))
+(x = _apply("anything");_or(proc { (_applyWithArgs("token", "*"); ['Many',        x] ) }, proc { (_applyWithArgs("token", "+"); ['Many1',       x] ) }, proc { (_applyWithArgs("token", "?");_xnot { _apply("atomicHostExpr") }; ['App','perhaps', x] ) }, proc { (_apply("empty"); x ) }))
 end
 
 def expr3

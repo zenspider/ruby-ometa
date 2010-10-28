@@ -424,16 +424,7 @@ class OMetaCore
     end
   end
 
-  ESCAPE_LOOKUP = {
-    'n' => "\n",
-    't' => "\t",
-    'r' => "\r",
-    '\'' => "'",
-    '\"' => '"',
-    '\\' => '\\'
-  }
-
   def unescapeChar c
-    ESCAPE_LOOKUP[c] or raise NotImplementedError
+		eval ("\"\\"+c+"\"")
   end
 end

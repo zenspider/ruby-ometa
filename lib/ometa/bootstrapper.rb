@@ -45,7 +45,7 @@ module Bootstrapper
       Dir[glob].collect do |filename|
         source    = IO.read(filename)
         parsed    = parser.matchAllwith(source, 'grammar')
-        optimized = optimizer.matchwith(parsed, 'optimizeGrammar')
+				optimized = optimizer.matchwith(parsed, 'optimizeGrammar')
         ruby      = translator.matchwith(optimized, 'trans')
 
         # this hack remains at the moment...

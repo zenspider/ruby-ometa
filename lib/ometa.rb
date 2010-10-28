@@ -1,7 +1,7 @@
 require 'ometa/runtime'
 require 'ometa/bootstrap'
 require 'ometa/bootstrapper'
-
+require 'ometa/leterize'
 class OMeta
   GRAMMAR_FILES = %w(ometa null_opt andor_opt ometa_opt bsruby_parser
     bsruby_translator ometa_parser ometa_translator)
