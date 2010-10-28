@@ -1,8 +1,8 @@
 
 ometa OMetaParser <: OMeta {
-  nameFirst      = <_$> | letter,
+  nameFirst      = <_$.^> | letter,
   nameRest       = nameFirst | digit,
-  tsName         = firstAndRest('"nameFirst"', '"nameRest"'):xs        -> { xs.join('') },
+  tsName         = firstAndRest('"nameFirst"', '"nameRest"'):xs        -> { leterize(xs.join('')) },
   name           = spaces tsName,
   eChar          = '\\' char:c                                         -> { unescapeChar c }
                  | char,
@@ -23,7 +23,8 @@ ometa OMetaParser <: OMeta {
   expr4          = expr3*:xs                                           -> { ['And',       *xs] },
   optIter :x     = "*"                                                 -> { ['Many',        x] }
                  | "+"                                                 -> { ['Many1',       x] }
-                 | empty                                               -> { x },
+                 | "?" ~atomicHostExpr																 -> { ['App','perhaps', x] }
+								 | empty                                               -> { x },
   expr3          = expr2:x optIter('x'):x ( ':' name:n                 -> { (@locals << n; ['Set', n, x]) }
                                           | empty                      -> x
                                           )

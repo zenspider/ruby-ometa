@@ -1,11 +1,17 @@
 ometa OMeta <: OMetaCore{
+. = anything
+,
 	regch :regex = char:c ?{Regexp.new("[#{regex}]").match(c)} -> {c}
 ,
-	end= ~anything
+	perhaps :expr = apply(expr) | empty
+,
+	end= ~.
 ,
 	empty = -> {true}
 ,
-	char= anything:c ?{Character === c } -> {c}
+	endline=  ("\r"+ "\n") | "\r" | "\n"
+,	
+	char= .:c ?{Character === c } -> {c}
 ,
 	space=char:c ?{c[0]<=32} -> {c}
 ,
