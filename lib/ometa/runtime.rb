@@ -64,9 +64,8 @@ class ReadStream < Stream
   end
 
   def next
-    @src[@pos]
-  ensure
     @pos += 1
+    @src[@pos-1]
   end
 end
 
@@ -166,41 +165,42 @@ class OMetaCore
   def _apply(rule)
     #p rule
     memoRec = @input.memo[rule]
-    if not memoRec then
-      oldInput = @input
-      lr = LeftRecursion.new
-      @input.memo[rule] = memoRec = lr
+		if not memoRec then
+			oldInput = @input
+			lr = LeftRecursion.new
+			@input.memo[rule] = memoRec = lr
 
-      # should these be copies too?
-      @input.memo[rule] = memoRec = { :ans => send(rule), :nextInput => @input }
+			# should these be copies too?
+			@input.memo[rule] = memoRec = [send(rule),  @input]
 
-      if lr.detected
-        sentinel = @input
-        while true
-          begin
-            @input = oldInput
-            ans = send rule
-            raise Fail if @input == sentinel
-            oldInput.memo[rule] = memoRec = { :ans => ans, :nextInput => @input}
-          rescue Fail
-            break
-          end
-        end
-      end
-    elsif LeftRecursion === memoRec
-      memoRec.detected = true
+			if lr.detected
+				sentinel = @input
+				while true
+					begin
+						@input = oldInput
+						ans = send rule
+						raise Fail if @input == sentinel
+						oldInput.memo[rule] = memoRec = [ ans,  @input]
+					rescue Fail
+						break
+					end
+				end
+			end
+		elsif LeftRecursion === memoRec
+			memoRec.detected = true
       raise Fail
     end
-    @input = memoRec[:nextInput]
-    return memoRec[:ans]
+    ans,@input = *memoRec
+    return ans
   end
 
   def _applyWithArgs(rule, *args)
-    #p :app_wit_arg => [rule, args]
-    args.reverse_each do |arg|
-      @input = LazyStream.new arg, @input, nil
-    end
-    send rule
+		oldInput = @input
+		args.reverse_each do |arg|
+			@input = LazyStream.new arg, @input, nil
+		end
+		send rule
+
   end
 
   def _superApplyWithArgs(rule, *args)
