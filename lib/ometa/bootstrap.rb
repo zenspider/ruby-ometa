@@ -19,7 +19,7 @@ end
 
 def end
 
-_xnot { _apply("anything") }
+_xnot { _apply("_dot_") }
 end
 
 def empty
@@ -34,7 +34,7 @@ end
 
 def char
 c = nil
-(c = _apply("anything");_pred(Character === c );c)
+(c = _apply("_dot_");_pred(Character === c );c)
 end
 
 def space
