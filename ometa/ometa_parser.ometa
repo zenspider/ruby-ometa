@@ -14,23 +14,24 @@ ometa OMetaParser <: OMeta {
   keyword :xs    = token('xs') ~letterOrDigit                          -> { xs },
   hostExpr       = foreign('BSRubyParser', '"expr"'):r                    foreign('BSRubyTranslator', '"trans"', 'r'),
   atomicHostExpr = foreign('BSRubyParser', '"semAction"'):r               foreign('BSRubyTranslator', '"trans"', 'r'),
+  inlineHostExpr = foreign('BSRubyParser', '"semAction2"'):r               foreign('BSRubyTranslator', '"trans"', 'r'),
   args           = "(" listOf('"hostExpr"', '","'):xs ")"              -> { xs }
                  | empty                                               -> { [] },
   application    = name:rule args:as                                   -> { ['App', rule, *as] },
-  semAction      = ("!" | "->") atomicHostExpr:x                       -> { ['Act',         x] },
-  semPred        = "?"          atomicHostExpr:x                       -> { ['Pred',        x] },
+  semAction      = "->" atomicHostExpr:x                       -> { ['Act',         x] },
+  semPred        = "&"          inlineHostExpr:x                       -> { ['Pred',        x] },
   expr           = listOf('"expr4"', '"|"'):xs                         -> { ['Or',        *xs] },
   expr4          = expr3*:xs                                           -> { ['And',       *xs] },
   optIter :x     = "*"                                                 -> { ['Many',        x] }
                  | "+"                                                 -> { ['Many1',       x] }
-                 | "?" ~atomicHostExpr																 -> { ['App','perhaps', x] }
+                 | "?" ~inlineHostExpr																								 -> { ['App','perhaps', x] }
 								 | empty                                               -> { x },
   expr3          = expr2:x optIter('x'):x ( ':' name:n                 -> { (@locals << n; ['Set', n, x]) }
                                           | empty                      -> x
                                           )
                  | ":" name:n                                          -> { (@locals << n; ['Set', n, ['App', 'anything']]) },
   expr2          = "~" expr2:x                                         -> { ['Not',         x] }
-                 | "&" expr1:x                                         -> { ['Lookahead',   x] }
+                 | "&" ~inlineHostExpr expr1:x                         -> { ['Lookahead',   x] }
                  | expr1,
   expr1          = application | semAction | semPred
                  | ( keyword('"undefined"') | keyword('"nil"')
@@ -41,9 +42,9 @@ ometa OMetaParser <: OMeta {
                  | "(" expr:x ")"                                      -> { x },
   ruleName       = name
                  | spaces tsString,
-  rule           = &(ruleName:n) !{@locals = []}
+  rule           = &(ruleName:n) ->{@locals = []}
                      rulePart('n'):x ("," rulePart('n'))*:xs           -> { ['Rule', n, @locals, ['Or', x, *xs]] },
-  rulePart :rn   = ruleName:n ?{n == rn} expr4:b1 ( "=" expr:b2        -> { ['And', b1, b2] }
+  rulePart :rn   = ruleName:n &{n == rn} expr4:b1 ( "=" expr:b2        -> { ['And', b1, b2] }
                                                   | empty              -> { b1 }
                                                   ),
   grammar        = keyword('"ometa"') name:n

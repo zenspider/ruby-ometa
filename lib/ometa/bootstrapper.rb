@@ -44,10 +44,13 @@ module Bootstrapper
     sources = Array(files).collect do |glob|
       Dir[glob].collect do |filename|
         source    = IO.read(filename)
-        parsed    = parser.matchAllwith(source, 'grammar')
+#puts source
+				parsed    = parser.matchAllwith(source, 'grammar')
+#puts parsed.inspect
 				optimized = optimizer.matchwith(parsed, 'optimizeGrammar')
+#puts optimized.inspect
         ruby      = translator.matchwith(optimized, 'trans')
-
+#puts ruby.inspect
         # this hack remains at the moment...
         ruby.gsub! /initialize/, 'initialize_hook'
 
