@@ -305,6 +305,11 @@ r = nil
 (r = _applyWithArgs("foreign", BSRubyParser, "semAction");_applyWithArgs("foreign", BSRubyTranslator, "trans", r))
 end
 
+def inlineHostExpr
+r = nil
+(r = _applyWithArgs("foreign", BSRubyParser, "semAction2");_applyWithArgs("foreign", BSRubyTranslator, "trans", r))
+end
+
 def args
 xs = nil
 _or(proc { (_applyWithArgs("token", "(");xs = _applyWithArgs("listOf", "hostExpr", ",");_applyWithArgs("token", ")"); xs ) }, proc { (_apply("empty"); [] ) })
@@ -317,12 +322,12 @@ end
 
 def semAction
 x = nil
-(_or(proc { _applyWithArgs("token", "!") }, proc { _applyWithArgs("token", "->") });x = _apply("atomicHostExpr"); ['Act',         x] )
+(_applyWithArgs("token", "->");x = _apply("atomicHostExpr"); ['Act',         x] )
 end
 
 def semPred
 x = nil
-(_applyWithArgs("token", "?");x = _apply("atomicHostExpr"); ['Pred',        x] )
+(_applyWithArgs("token", "&");x = _apply("inlineHostExpr"); ['Pred',        x] )
 end
 
 def expr
@@ -337,7 +342,7 @@ end
 
 def optIter
 x = nil
-(x = _apply("anything");_or(proc { (_applyWithArgs("token", "*"); ['Many',        x] ) }, proc { (_applyWithArgs("token", "+"); ['Many1',       x] ) }, proc { (_applyWithArgs("token", "?");_xnot { _apply("atomicHostExpr") }; ['App','perhaps', x] ) }, proc { (_apply("empty"); x ) }))
+(x = _apply("anything");_or(proc { (_applyWithArgs("token", "*"); ['Many',        x] ) }, proc { (_applyWithArgs("token", "+"); ['Many1',       x] ) }, proc { (_applyWithArgs("token", "?");_xnot { _apply("inlineHostExpr") }; ['App','perhaps', x] ) }, proc { (_apply("empty"); x ) }))
 end
 
 def expr3
@@ -347,7 +352,7 @@ end
 
 def expr2
 x = x = nil
-_or(proc { (_applyWithArgs("token", "~");x = _apply("expr2"); ['Not',         x] ) }, proc { (_applyWithArgs("token", "&");x = _apply("expr1"); ['Lookahead',   x] ) }, proc { _apply("expr1") })
+_or(proc { (_applyWithArgs("token", "~");x = _apply("expr2"); ['Not',         x] ) }, proc { (_applyWithArgs("token", "&");_xnot { _apply("inlineHostExpr") };x = _apply("expr1"); ['Lookahead',   x] ) }, proc { _apply("expr1") })
 end
 
 def expr1
