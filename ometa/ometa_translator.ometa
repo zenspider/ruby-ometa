@@ -1,13 +1,13 @@
 
 ometa RubyOMetaTranslator {
-  trans [:t apply('t'):ans]           -> { ans },
+  trans [:t apply(t):ans]           -> { ans },
   App  'super' anything+:args         -> { "_superApplyWithArgs(#{args * ', '})" },
   App  :rule   anything+:args         -> { "_applyWithArgs(#{rule.inspect}, #{args * ', '})" },
   App  :rule                          -> { "_apply(#{rule.inspect})" },
   Act  :expr                          -> { expr },
   Pred :expr                          -> { "_pred(#{expr})" },
   Or   transFn*:xs                    -> { "_or(#{xs * ', '})" },
-  And  notLast('"trans"')*:xs trans:y -> { "(#{(xs + [y]) * ';'})" },
+  And  notLast("trans")*:xs trans:y -> { "(#{(xs + [y]) * ';'})" },
   And                                 -> { "proc {}" },
   Many  trans:x                       -> { "_xmany { #{x} }" },
   Many1 trans:x                       -> { "_xmany1 { #{x} }" },

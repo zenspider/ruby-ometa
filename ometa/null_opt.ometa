@@ -1,8 +1,7 @@
 ometa NullOptimizer {
   setHelped = ->{@_didSomething = true},
   helped    = &{@_didSomething},
-  trans     = [:t &{respond_to?(t)}
-               apply('t'):ans]   -> { ans }
+  trans     = [:t &{respond_to?(t)} apply(t):ans]   -> { ans }
             | anything,
   optimize  = trans:x helped     -> { x },
   Or        trans*:xs            -> { ['Or',      *xs] },

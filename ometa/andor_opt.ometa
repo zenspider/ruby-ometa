@@ -1,10 +1,10 @@
 ometa AndOrOptimizer <: NullOptimizer {
   And trans:x end          setHelped  -> { x },
-  And transInside('"And"'):xs         -> { ['And', *xs] },
+  And transInside("And"):xs         -> { ['And', *xs] },
   Or  trans:x end          setHelped  -> { x },
-  Or  transInside('"Or"'):xs          -> { ['Or',  *xs] },
-  transInside :t = [exactly('t') transInside('t'):xs] transInside('t'):ys setHelped -> { xs + ys }
-                 | trans:x                        transInside('t'):xs               -> { [x, *xs] }
+  Or  transInside("Or"):xs          -> { ['Or',  *xs] },
+  transInside :t = [exactly(t) transInside(t):xs] transInside(t):ys setHelped -> { xs + ys }
+                 | trans:x                        transInside(t):xs               -> { [x, *xs] }
                  |                                                                  -> { [] }
 }
 
