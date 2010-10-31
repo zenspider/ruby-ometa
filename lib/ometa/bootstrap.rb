@@ -316,8 +316,8 @@ _or(proc { (_applyWithArgs("token", "(");xs = _applyWithArgs("listOf", "hostExpr
 end
 
 def application
-rule = as = nil
-(rule = _apply("name");as = _apply("args"); ['App', rule, *as] )
+klas = rule = as = rule = as = nil
+_or(proc { (klas = _apply("name");_applyWithArgs("token", "::");rule = _apply("name");as = _apply("args"); ['App', 'foreign',klas,rule.inspect, *as] ) }, proc { (rule = _apply("name");as = _apply("args"); ['App', rule, *as] ) })
 end
 
 def semAction
