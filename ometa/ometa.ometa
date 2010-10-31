@@ -1,19 +1,19 @@
 ometa OMeta <: OMetaCore{
 . = anything
 ,
-	regch :regex = char:c &{Regexp.new("[#{regex}]").match(c)} -> {c}
+	regch :regex = char:c &{Regexp.new("[#{regex}]").match(c)} -> c
 ,
 	perhaps :expr = apply(expr) | empty
 ,
 	end= ~.
 ,
-	empty = -> {true}
+	empty = -> true
 ,
 	endline=  ("\r"+ "\n") | "\r" | "\n"
 ,	
-	char= .:c &{Character === c } -> {c}
+	char= .:c &{Character === c } -> c
 ,
-	space=char:c &{c[0]<=32} -> {c}
+	space=char:c &{c[0]<=32} -> c
 ,
 	spaces=space* 
 ,

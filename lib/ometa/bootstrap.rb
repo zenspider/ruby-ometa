@@ -150,17 +150,17 @@ AndOrOptimizer = Class.new(NullOptimizer) do
 @name = "AndOrOptimizer"
 def And
 x = xs = nil
-_or(proc { (x = _apply("trans");_apply("end");_apply("setHelped"); x ) }, proc { (xs = _applyWithArgs("transInside", "And"); ['And', *xs] ) })
+_or(proc { (x = _apply("trans");_apply("end");_apply("setHelped");x ) }, proc { (xs = _applyWithArgs("transInside", "And");['And', *xs] ) })
 end
 
 def Or
 x = xs = nil
-_or(proc { (x = _apply("trans");_apply("end");_apply("setHelped"); x ) }, proc { (xs = _applyWithArgs("transInside", "Or"); ['Or',  *xs] ) })
+_or(proc { (x = _apply("trans");_apply("end");_apply("setHelped");x ) }, proc { (xs = _applyWithArgs("transInside", "Or");['Or',  *xs] ) })
 end
 
 def transInside
 t = xs = ys = x = xs = nil
-(t = _apply("anything");_or(proc { (_xform { (_applyWithArgs("exactly", t);xs = _applyWithArgs("transInside", t)) };ys = _applyWithArgs("transInside", t);_apply("setHelped"); xs + ys ) }, proc { (x = _apply("trans");xs = _applyWithArgs("transInside", t); [x, *xs] ) }, proc {  []  }))
+(t = _apply("anything");_or(proc { (_xform { (_applyWithArgs("exactly", t);xs = _applyWithArgs("transInside", t)) };ys = _applyWithArgs("transInside", t);_apply("setHelped");xs + ys ) }, proc { (x = _apply("trans");xs = _applyWithArgs("transInside", t);[x, *xs] ) }, proc { []  }))
 end
 end
 
@@ -272,7 +272,7 @@ end
 
 def tsName
 xs = nil
-(xs = _applyWithArgs("firstAndRest", "nameFirst", "nameRest"); leterize(xs.join('')) )
+(xs = _applyWithArgs("firstAndRest", "nameFirst","nameRest");leterize(xs.join('')) )
 end
 
 def name
@@ -282,37 +282,37 @@ end
 
 def eChar
 c = nil
-_or(proc { (_applyWithArgs("exactly", "\\");c = _apply("char"); unescapeChar c ) }, proc { _apply("char") })
+_or(proc { (_applyWithArgs("exactly", "\\");c = _apply("char");unescapeChar c ) }, proc { _apply("char") })
 end
 
 def tsString
 xs = nil
-(_applyWithArgs("exactly", "'");xs = _xmany { (_xnot { _applyWithArgs("exactly", "'") };_apply("eChar")) };_applyWithArgs("exactly", "'"); xs.join('') )
+(_applyWithArgs("exactly", "'");xs = _xmany { (_xnot { _applyWithArgs("exactly", "'") };_apply("eChar")) };_applyWithArgs("exactly", "'");xs.join('') )
 end
 
 def characters
 xs = nil
-(_applyWithArgs("exactly", "`");_applyWithArgs("exactly", "`");xs = _xmany { (_xnot { (_applyWithArgs("exactly", "'");_applyWithArgs("exactly", "'")) };_apply("eChar")) };_applyWithArgs("exactly", "'");_applyWithArgs("exactly", "'"); ['App', 'seq',     xs.join('').inspect] )
+(_applyWithArgs("exactly", "`");_applyWithArgs("exactly", "`");xs = _xmany { (_xnot { (_applyWithArgs("exactly", "'");_applyWithArgs("exactly", "'")) };_apply("eChar")) };_applyWithArgs("exactly", "'");_applyWithArgs("exactly", "'");['App', 'seq',     xs.join('').inspect] )
 end
 
 def sCharacters
 xs = nil
-(_applyWithArgs("exactly", "\"");xs = _xmany { (_xnot { _applyWithArgs("exactly", "\"") };_apply("eChar")) };_applyWithArgs("exactly", "\""); ['App', 'token',   xs.join('').inspect] )
+(_applyWithArgs("exactly", "\"");xs = _xmany { (_xnot { _applyWithArgs("exactly", "\"") };_apply("eChar")) };_applyWithArgs("exactly", "\"");['App', 'token',   xs.join('').inspect] )
 end
 
 def string
 xs = nil
-(xs = _or(proc { (_or(proc { _applyWithArgs("exactly", "#") }, proc { _applyWithArgs("exactly", "`") });_apply("tsName")) }, proc { _apply("tsString") }); ['App', 'exactly', xs.inspect] )
+(xs = _or(proc { (_or(proc { _applyWithArgs("exactly", "#") }, proc { _applyWithArgs("exactly", "`") });_apply("tsName")) }, proc { _apply("tsString") });['App', 'exactly', xs.inspect] )
 end
 
 def number
 sign = ds = nil
-(sign = _or(proc { _applyWithArgs("exactly", "-") }, proc { (_apply("empty"); '' ) });ds = _xmany1 { _apply("digit") }; ['App', 'exactly', sign + ds.join('')] )
+(sign = _or(proc { _applyWithArgs("exactly", "-") }, proc { (_apply("empty"); '' ) });ds = _xmany1 { _apply("digit") };['App', 'exactly', sign + ds.join('')] )
 end
 
 def keyword
 xs = nil
-(xs = _apply("anything");_applyWithArgs("token", xs);_xnot { _apply("letterOrDigit") }; xs )
+(xs = _apply("anything");_applyWithArgs("token", xs);_xnot { _apply("letterOrDigit") };xs )
 end
 
 def hostExpr
@@ -332,52 +332,42 @@ end
 
 def args
 xs = nil
-_or(proc { (xs = _apply("hostExpr"); xs ) }, proc { (_apply("empty"); "" ) })
+_or(proc { (xs = _apply("hostExpr");xs ) }, proc { (_apply("empty");"" ) })
 end
 
 def application
 klas = rule = as = rule = as = nil
-_or(proc { (klas = _apply("name");_applyWithArgs("token", "::");rule = _apply("name");as = _apply("args"); ['App', 'foreign',klas,rule.inspect, *as] ) }, proc { (rule = _apply("name");as = _apply("args"); ['App', rule, *as] ) })
-end
-
-def semAction
-x = nil
-(_applyWithArgs("token", "->");x = _apply("atomicHostExpr"); ['Act',         x] )
-end
-
-def semPred
-x = nil
-(_applyWithArgs("token", "&");x = _apply("inlineHostExpr"); ['Pred',        x] )
+_or(proc { (klas = _apply("name");_applyWithArgs("token", "::");rule = _apply("name");as = _apply("args");['App', 'foreign',klas,rule.inspect, *as] ) }, proc { (rule = _apply("name");as = _apply("args");['App', rule, *as] ) })
 end
 
 def expr
 xs = nil
-(xs = _applyWithArgs("listOf", "expr4", "|"); ['Or',        *xs] )
+(xs = _applyWithArgs("listOf", "expr4", "|");['Or',        *xs] )
 end
 
 def expr4
 xs = nil
-(xs = _xmany { _apply("expr3") }; ['And',       *xs] )
+(xs = _xmany { _apply("expr3") };['And',       *xs] )
 end
 
 def optIter
 x = nil
-(x = _apply("anything");_or(proc { (_applyWithArgs("token", "*"); ['Many',        x] ) }, proc { (_applyWithArgs("token", "+"); ['Many1',       x] ) }, proc { (_applyWithArgs("token", "?");_xnot { _apply("inlineHostExpr") }; ['App','perhaps', x] ) }, proc { (_apply("empty"); x ) }))
+(x = _apply("anything");_or(proc { (_applyWithArgs("token", "*");['Many',        x]) }, proc { (_applyWithArgs("token", "+");['Many1',       x] ) }, proc { (_applyWithArgs("token", "?");_xnot { _apply("inlineHostExpr") };['App','perhaps', x] ) }, proc { (_apply("empty");x ) }))
 end
 
 def expr3
 x = x = n = n = nil
-_or(proc { (x = _apply("expr2");x = _applyWithArgs("optIter", x);_or(proc { (_applyWithArgs("exactly", ":");n = _apply("name"); (@locals << n; ['Set', n, x]) ) }, proc { (_apply("empty");x) })) }, proc { (_applyWithArgs("token", ":");n = _apply("name"); (@locals << n; ['Set', n, ['App', 'anything']]) ) })
+_or(proc { (x = _apply("expr2");x = _applyWithArgs("optIter", x);_or(proc { (_applyWithArgs("exactly", ":");n = _apply("name");(@locals << n; ['Set', n, x]) ) }, proc { (_apply("empty");x) })) }, proc { (_applyWithArgs("token", ":");n = _apply("name");(@locals << n; ['Set', n, ['App', 'anything']]) ) })
 end
 
 def expr2
 x = x = nil
-_or(proc { (_applyWithArgs("token", "~");x = _apply("expr2"); ['Not',         x] ) }, proc { (_applyWithArgs("token", "&");_xnot { _apply("inlineHostExpr") };x = _apply("expr1"); ['Lookahead',   x] ) }, proc { _apply("expr1") })
+_or(proc { (_applyWithArgs("token", "~");x = _apply("expr2");['Not',         x] ) }, proc { (_applyWithArgs("token", "&");_xnot { _apply("inlineHostExpr") };x = _apply("expr1");['Lookahead',   x] ) }, proc { _apply("expr1") })
 end
 
 def expr1
-x = x = x = x = nil
-_or(proc { _apply("application") }, proc { _apply("semAction") }, proc { _apply("semPred") }, proc { (_apply("spaces");_or(proc { _apply("characters") }, proc { _apply("sCharacters") }, proc { _apply("string") }, proc { _apply("number") })) }, proc { (_applyWithArgs("token", "[");x = _apply("expr");_applyWithArgs("token", "]"); ['Form', x] ) }, proc { (_applyWithArgs("token", "<");x = _xmany1 { (_xnot { _applyWithArgs("token", ">") };_apply("eChar")) };_applyWithArgs("token", ">"); ['App', 'regch', x.join('').inspect] ) }, proc { (_applyWithArgs("token", "(");x = _apply("expr");_applyWithArgs("token", ")"); x ) }, proc { (x = _or(proc { _applyWithArgs("keyword", undefined) }, proc { _applyWithArgs("keyword", nil) }, proc { _applyWithArgs("keyword", true) }, proc { _applyWithArgs("keyword", false) }); ['App', 'exactly', x] ) })
+x = x = x = x = x = nil
+_or(proc { _apply("application") }, proc { (_applyWithArgs("token", "->");x = _apply("atomicHostExpr");['Act',         x]) }, proc { (_applyWithArgs("token", "&");x = _apply("inlineHostExpr");['Pred',        x]) }, proc { (_apply("spaces");_or(proc { _apply("characters") }, proc { _apply("sCharacters") }, proc { _apply("string") }, proc { _apply("number") })) }, proc { (_applyWithArgs("token", "[");x = _apply("expr");_applyWithArgs("token", "]");['Form', x] ) }, proc { (_applyWithArgs("token", "<");x = _xmany1 { (_xnot { _applyWithArgs("token", ">") };_apply("eChar")) };_applyWithArgs("token", ">");['App', 'regch', x.join('').inspect] ) }, proc { (_applyWithArgs("token", "(");x = _apply("expr");_applyWithArgs("token", ")");x ) })
 end
 
 def ruleName
@@ -387,17 +377,17 @@ end
 
 def rule
 n = x = xs = nil
-(_xlookahead { n = _apply("ruleName") };@locals = [];x = _applyWithArgs("rulePart", n);xs = _xmany { (_applyWithArgs("token", ",");_applyWithArgs("rulePart", n)) }; ['Rule', n, @locals, ['Or', x, *xs]] )
+(_xlookahead { n = _apply("ruleName") };@locals = [];x = _applyWithArgs("rulePart", n);xs = _xmany { (_applyWithArgs("token", ",");_applyWithArgs("rulePart", n)) };['Rule', n, @locals, ['Or', x, *xs]] )
 end
 
 def rulePart
 rn = n = b1 = b2 = nil
-(rn = _apply("anything");n = _apply("ruleName");_pred(n == rn);b1 = _apply("expr4");_or(proc { (_applyWithArgs("token", "=");b2 = _apply("expr"); ['And', b1, b2] ) }, proc { (_apply("empty"); b1 ) }))
+(rn = _apply("anything");n = _apply("ruleName");_pred(n == rn);b1 = _apply("expr4");_or(proc { (_applyWithArgs("token", "=");b2 = _apply("expr");['And', b1, b2] ) }, proc { (_apply("empty");b1 ) }))
 end
 
 def grammar
 n = sn = rs = nil
-(_applyWithArgs("keyword", "ometa");n = _apply("name");sn = _or(proc { (_applyWithArgs("token", "<:");_apply("name")) }, proc { (_apply("empty"); 'OMeta' ) });_applyWithArgs("token", "{");rs = _applyWithArgs("listOf", "rule", ",");_applyWithArgs("token", "}"); ['Grammar', n, sn, *rs] )
+(_applyWithArgs("keyword", "ometa");n = _apply("name");sn = _or(proc { (_applyWithArgs("token", "<:");_apply("name")) }, proc { (_apply("empty"); 'OMeta' ) });_applyWithArgs("token", "{");rs = _applyWithArgs("listOf", "rule", ",");_applyWithArgs("token", "}");['Grammar', n, sn, *rs] )
 end
 end
 
