@@ -46,7 +46,7 @@ module Bootstrapper
       Dir[glob].collect do |filename|
         source    = IO.read(filename)
 D.puts source
-				parsed    = parser.matchAllwith(source, 'grammar')
+				parsed    = parser.parsewith(source, 'grammar')
 D.puts parsed.inspect
 				optimized = optimizer.matchwith(parsed, 'optimizeGrammar')
 D.puts optimized.inspect
