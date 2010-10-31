@@ -14,7 +14,7 @@ end
 
 def perhaps
 expr = nil
-(expr = _apply("anything");_or(proc { (_apply("apply");_apply("expr")) }, proc { _apply("empty") }))
+(expr = _apply("anything");_or(proc { _applyWithArgs("apply", expr) }, proc { _apply("empty") }))
 end
 
 def end
@@ -189,9 +189,29 @@ xs = nil
 (_applyWithArgs("exactly", "'");xs = _xmany { (_xnot { _applyWithArgs("exactly", "'") };_apply("eChar")) };_applyWithArgs("exactly", "'"); xs.join('') )
 end
 
+def nonBraChar
+
+(_xnot { _applyWithArgs("exactly", "(") };_xnot { _applyWithArgs("exactly", ")") };_apply("char"))
+end
+
+def insideBra
+
+_or(proc { _apply("innerBra") }, proc { _apply("nonBraChar") })
+end
+
+def innerBra
+xs = nil
+(_applyWithArgs("exactly", "(");xs = _xmany { _apply("insideBra") };_applyWithArgs("exactly", ")"); "{#{xs.join('')}}" )
+end
+
+def outerBra
+xs = nil
+(_applyWithArgs("exactly", "(");xs = _xmany { _apply("insideBra") };_applyWithArgs("exactly", ")"); xs.join('') )
+end
+
 def expr
 
-(_apply("spaces");_apply("tsString"))
+_apply("outerBra")
 end
 
 def semAction1
@@ -312,7 +332,7 @@ end
 
 def args
 xs = nil
-_or(proc { (_applyWithArgs("token", "(");xs = _applyWithArgs("listOf", "hostExpr", ",");_applyWithArgs("token", ")"); xs ) }, proc { (_apply("empty"); [] ) })
+_or(proc { (xs = _apply("hostExpr"); xs ) }, proc { (_apply("empty"); "" ) })
 end
 
 def application
@@ -357,7 +377,7 @@ end
 
 def expr1
 x = x = x = x = nil
-_or(proc { _apply("application") }, proc { _apply("semAction") }, proc { _apply("semPred") }, proc { (x = _or(proc { _applyWithArgs("keyword", "undefined") }, proc { _applyWithArgs("keyword", "nil") }, proc { _applyWithArgs("keyword", "true") }, proc { _applyWithArgs("keyword", "false") }); ['App', 'exactly', x] ) }, proc { (_apply("spaces");_or(proc { _apply("characters") }, proc { _apply("sCharacters") }, proc { _apply("string") }, proc { _apply("number") })) }, proc { (_applyWithArgs("token", "[");x = _apply("expr");_applyWithArgs("token", "]"); ['Form', x] ) }, proc { (_applyWithArgs("token", "<");x = _xmany1 { (_xnot { _applyWithArgs("token", ">") };_apply("eChar")) };_applyWithArgs("token", ">"); ['App', 'regch', x.join('').inspect] ) }, proc { (_applyWithArgs("token", "(");x = _apply("expr");_applyWithArgs("token", ")"); x ) })
+_or(proc { _apply("application") }, proc { _apply("semAction") }, proc { _apply("semPred") }, proc { (_apply("spaces");_or(proc { _apply("characters") }, proc { _apply("sCharacters") }, proc { _apply("string") }, proc { _apply("number") })) }, proc { (_applyWithArgs("token", "[");x = _apply("expr");_applyWithArgs("token", "]"); ['Form', x] ) }, proc { (_applyWithArgs("token", "<");x = _xmany1 { (_xnot { _applyWithArgs("token", ">") };_apply("eChar")) };_applyWithArgs("token", ">"); ['App', 'regch', x.join('').inspect] ) }, proc { (_applyWithArgs("token", "(");x = _apply("expr");_applyWithArgs("token", ")"); x ) }, proc { (x = _or(proc { _applyWithArgs("keyword", undefined) }, proc { _applyWithArgs("keyword", nil) }, proc { _applyWithArgs("keyword", true) }, proc { _applyWithArgs("keyword", false) }); ['App', 'exactly', x] ) })
 end
 
 def ruleName
