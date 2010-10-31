@@ -12,12 +12,13 @@ ometa OMetaParser <: OMeta {
   string         = (('#' | '`') tsName | tsString):xs                  -> { ['App', 'exactly', xs.inspect] },
   number         = ('-' | empty -> { '' }):sign digit+:ds              -> { ['App', 'exactly', sign + ds.join('')] },
   keyword :xs    = token('xs') ~letterOrDigit                          -> { xs },
-  hostExpr       = foreign('BSRubyParser', '"expr"'):r                    foreign('BSRubyTranslator', '"trans"', 'r'),
-  atomicHostExpr = foreign('BSRubyParser', '"semAction"'):r               foreign('BSRubyTranslator', '"trans"', 'r'),
-  inlineHostExpr = foreign('BSRubyParser', '"semAction2"'):r               foreign('BSRubyTranslator', '"trans"', 'r'),
+  hostExpr       = BSRubyParser::expr:r                    BSRubyTranslator::trans('r'),
+  atomicHostExpr = BSRubyParser::semAction:r               BSRubyTranslator::trans('r'),
+  inlineHostExpr = BSRubyParser::semAction2:r              BSRubyTranslator::trans('r'),
   args           = "(" listOf('"hostExpr"', '","'):xs ")"              -> { xs }
                  | empty                                               -> { [] },
-  application    = name:rule args:as                                   -> { ['App', rule, *as] },
+  application    = 	name:klas "::" name:rule args:as	 								 -> { ['App', 'foreign',klas,rule.inspect, *as] }
+									|	name:rule args:as                                  -> { ['App', rule, *as] },
   semAction      = "->" atomicHostExpr:x                       -> { ['Act',         x] },
   semPred        = "&"          inlineHostExpr:x                       -> { ['Pred',        x] },
   expr           = listOf('"expr4"', '"|"'):xs                         -> { ['Or',        *xs] },
