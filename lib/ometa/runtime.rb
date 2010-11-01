@@ -383,7 +383,7 @@ class OMetaCore
     _or(proc {
           r = _apply(rule)
           _xmany(r) {
-            _applyWithArgs("token", delim)
+            _apply(delim)
             _apply(rule)
           }
         },

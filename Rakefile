@@ -14,6 +14,14 @@ task :bootstrap do
   end
 end
 
+desc 'create new standard'
+task :standard do
+	commit=`git rev-parse HEAD`.strip
+	mkdir "standards/#{commit}"
+	cp "lib/ometa/bootstrap.rb","standards/#{commit}"
+end
+
+
 desc "basic bootstrap profiling"
 task :profile do
   sh 'zenprofile -Ilib -rometa -e "Bootstrapper.to_ruby(OMeta::GRAMMAR_FILES)"'
