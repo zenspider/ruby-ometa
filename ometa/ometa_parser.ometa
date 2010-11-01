@@ -35,9 +35,11 @@ ometa OMetaParser <: OMeta {
   application    = 	name:klas "::" name:rule args:as	 								 ->  ['App', 'foreign',klas,rule.inspect, *as] 
 									|	name:rule args:as                                  ->  ['App', rule, *as] 
 ,
-  expr           = listOf("expr4", "|"):xs                         ->  ['Or',        *xs] 
+	or = "|"
 ,
-  expr4          = expr3*:xs                                           ->  ['And',       *xs] 
+  expr           = listOf("expr4", "or"):xs                         ->  (xs.size==1 ? xs[0] : ['Or',        *xs] )
+,
+  expr4          = expr3*:xs                                           -> (xs.size==1 ? xs[0] : ['And',       *xs] )
 ,
   optIter :x     = "*"                                                 ->  ['Many',        x]
                  | "+"                                                 ->  ['Many1',       x] 
@@ -65,7 +67,7 @@ ometa OMetaParser <: OMeta {
                  | spaces tsString
 ,
   rule           = &(ruleName:n) -> @locals = []
-                     rulePart(n):x ("," rulePart(n))*:xs           ->  ['Rule', n, @locals, ['Or', x, *xs]] 
+                     rulePart(n):x (ruleSep rulePart(n))*:xs           ->  ['Rule', n, @locals, ['Or', x, *xs]] 
 ,
   rulePart :rn   = ruleName:n &{n == rn} expr4:b1 ( "=" expr:b2        ->  ['And', b1, b2] 
                                                   | empty              ->  b1 
@@ -73,6 +75,9 @@ ometa OMetaParser <: OMeta {
 ,
   grammar        = keyword("ometa") name:n
                    ( "<:" name | empty -> { 'OMeta' }):sn
-                   "{" listOf("rule", ","):rs "}"                  ->  ['Grammar', n, sn, *rs] 
-
+                   "{" listOf("rule", "ruleSep"):rs "}"                  ->  ['Grammar', n, sn, *rs]
+,
+	ruleSep = "," 
+,
+rs2 = (~endline space)* endline (~endline space)* endline
 }

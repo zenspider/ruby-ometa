@@ -1,7 +1,7 @@
 ometa OMeta <: OMetaCore{
 . = anything
-,
-	regch :regex = char:c &{Regexp.new("[#{regex}]").match(c)} -> c
+,	
+regch :regex = char:c &{Regexp.new("[#{regex}]").match(c)} -> c
 ,
 	perhaps :expr = apply(expr) | empty
 ,
@@ -9,7 +9,7 @@ ometa OMeta <: OMetaCore{
 ,
 	empty = -> true
 ,
-	endline=  ("\r"+ "\n") | "\r" | "\n"
+	endline=  ("\r" "\n" ) | "\r" | "\n"
 ,	
 	char= .:c &{Character === c } -> c
 ,

@@ -29,7 +29,7 @@ end
 
 def endline
 
-_or(proc { (_xmany1 { _applyWithArgs("token", "\r") };_applyWithArgs("token", "\n")) }, proc { _applyWithArgs("token", "\r") }, proc { _applyWithArgs("token", "\n") })
+_or(proc { (_applyWithArgs("token", "\r");_applyWithArgs("token", "\n")) }, proc { _applyWithArgs("token", "\r") }, proc { _applyWithArgs("token", "\n") })
 end
 
 def char
@@ -340,14 +340,19 @@ klas = rule = as = rule = as = nil
 _or(proc { (klas = _apply("name");_applyWithArgs("token", "::");rule = _apply("name");as = _apply("args");['App', 'foreign',klas,rule.inspect, *as] ) }, proc { (rule = _apply("name");as = _apply("args");['App', rule, *as] ) })
 end
 
+def or
+
+_applyWithArgs("token", "|")
+end
+
 def expr
 xs = nil
-(xs = _applyWithArgs("listOf", "expr4", "|");['Or',        *xs] )
+(xs = _applyWithArgs("listOf", "expr4", "or");(xs.size==1 ? xs[0] : ['Or',        *xs] ))
 end
 
 def expr4
 xs = nil
-(xs = _xmany { _apply("expr3") };['And',       *xs] )
+(xs = _xmany { _apply("expr3") };(xs.size==1 ? xs[0] : ['And',       *xs] ))
 end
 
 def optIter
@@ -377,7 +382,7 @@ end
 
 def rule
 n = x = xs = nil
-(_xlookahead { n = _apply("ruleName") };@locals = [];x = _applyWithArgs("rulePart", n);xs = _xmany { (_applyWithArgs("token", ",");_applyWithArgs("rulePart", n)) };['Rule', n, @locals, ['Or', x, *xs]] )
+(_xlookahead { n = _apply("ruleName") };@locals = [];x = _applyWithArgs("rulePart", n);xs = _xmany { (_apply("ruleSep");_applyWithArgs("rulePart", n)) };['Rule', n, @locals, ['Or', x, *xs]] )
 end
 
 def rulePart
@@ -387,7 +392,17 @@ end
 
 def grammar
 n = sn = rs = nil
-(_applyWithArgs("keyword", "ometa");n = _apply("name");sn = _or(proc { (_applyWithArgs("token", "<:");_apply("name")) }, proc { (_apply("empty"); 'OMeta' ) });_applyWithArgs("token", "{");rs = _applyWithArgs("listOf", "rule", ",");_applyWithArgs("token", "}");['Grammar', n, sn, *rs] )
+(_applyWithArgs("keyword", "ometa");n = _apply("name");sn = _or(proc { (_applyWithArgs("token", "<:");_apply("name")) }, proc { (_apply("empty"); 'OMeta' ) });_applyWithArgs("token", "{");rs = _applyWithArgs("listOf", "rule", "ruleSep");_applyWithArgs("token", "}");['Grammar', n, sn, *rs])
+end
+
+def ruleSep
+
+_applyWithArgs("token", ",")
+end
+
+def rs2
+
+(_xmany { (_xnot { _apply("endline") };_apply("space")) };_apply("endline");_xmany { (_xnot { _apply("endline") };_apply("space")) };_apply("endline"))
 end
 end
 
