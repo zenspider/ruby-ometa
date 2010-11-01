@@ -399,11 +399,6 @@ def ruleSep
 
 _applyWithArgs("token", ",")
 end
-
-def rs2
-
-(_xmany { (_xnot { _apply("endline") };_apply("space")) };_apply("endline");_xmany { (_xnot { _apply("endline") };_apply("space")) };_apply("endline"))
-end
 end
 
 RubyOMetaTranslator = Class.new(OMeta) do

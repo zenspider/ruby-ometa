@@ -3,12 +3,10 @@ ometa BSRubyParser <: OMeta {
   eChar          = '\\' char:c                            -> { unescapeChar c }
                  | char,
   tsString       = '\'' (~'\'' eChar)*:xs '\''            -> { xs.join('') },
-  
 	nonBraChar   = ~'(' ~')' char,
   insideBra         = innerBra | nonBraChar,
   innerBra    = '(' insideBra*:xs ')'                     -> { "{#{xs.join('')}}" },
   outerBra    = '(' insideBra*:xs ')'                     -> { xs.join('') },
-
 	expr           = outerBra,
   semAction1     = spaces (~seq("\n") anything)*:xs    -> { xs.join('') },
   nonBraceChar   = ~'{' ~'}' char,
