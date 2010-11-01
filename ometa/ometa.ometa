@@ -1,29 +1,29 @@
 ometa OMeta <: OMetaCore{
-. = anything
-,	
-regch :regex = char:c &{Regexp.new("[#{regex}]").match(c)} -> c
-,
-	perhaps :expr = apply(expr) | empty
-,
-	end= ~.
-,
+  . = anything
+
+  regch :regex = char:c &{Regexp.new("[#{regex}]").match(c)} -> c
+	
+  perhaps :expr = apply(expr) | empty
+	
+  end= ~.
+
 	empty = -> true
-,
-	endline=  ("\r" "\n" ) | "\r" | "\n"
-,	
-	char= .:c &{Character === c } -> c
-,
+	
+  endline=  ("\r" "\n" ) | "\r" | "\n"
+	
+  char= .:c &{Character === c } -> c
+
 	space=char:c &{c[0]<=32} -> c
-,
+
 	spaces=space* 
-,
+
 	digit=<0-9>
-,
+
 	lower=<a-z>
-,
+
 	upper=<A-Z>
-,
-	letter=lower | upper
-,
+	
+  letter=lower | upper
+
 	letterOrDigit=letter | digit
 }

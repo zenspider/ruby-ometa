@@ -46,6 +46,8 @@ module Bootstrapper
       Dir[glob].collect do |filename|
         source    = IO.read(filename)
 D.puts source
+			source = source.gsub(/\n\s*\n/,"\n,\n")
+
 				parsed    = parser.parsewith(source, 'grammar')
 D.puts parsed.inspect
 				optimized = optimizer.matchwith(parsed, 'optimizeGrammar')
