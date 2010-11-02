@@ -3,8 +3,6 @@ ometa OMeta <: OMetaCore{
 
   regch :regex = char:c &{Regexp.new("[#{regex}]").match(c)} -> c
 	
-  perhaps :expr = apply(expr) | empty
-	
   end= ~.
 
 	empty = -> true
@@ -13,7 +11,7 @@ ometa OMeta <: OMetaCore{
 	
   char= .:c &{Character === c } -> c
 
-	space=char:c &{c[0]<=32} -> c
+	space=<\s\t\r\n\f>
 
 	spaces=space* 
 
@@ -22,8 +20,16 @@ ometa OMeta <: OMetaCore{
 	lower=<a-z>
 
 	upper=<A-Z>
-	
+		
   letter=lower | upper
 
 	letterOrDigit=letter | digit
+	
+	alpha = letter
+
+	alnum = letterOrDigit
+
+	xdigit = <0-9a-fA-F>
+
+	word = alpha | '_'
 }

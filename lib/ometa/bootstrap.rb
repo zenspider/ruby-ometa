@@ -12,11 +12,6 @@ regex = c = nil
 (regex = _apply("anything");c = _apply("char");_pred(Regexp.new("[#{regex}]").match(c));c)
 end
 
-def perhaps
-expr = nil
-(expr = _apply("anything");_or(proc { _applyWithArgs("apply", expr) }, proc { _apply("empty") }))
-end
-
 def end
 
 _xnot { _apply("_dot_") }
@@ -38,8 +33,8 @@ c = nil
 end
 
 def space
-c = nil
-(c = _apply("char");_pred(c[0]<=32);c)
+
+_applyWithArgs("regch", " \t\r\n\f")
 end
 
 def spaces
@@ -70,6 +65,26 @@ end
 def letterOrDigit
 
 _or(proc { _apply("letter") }, proc { _apply("digit") })
+end
+
+def alpha
+
+_apply("letter")
+end
+
+def alnum
+
+_apply("letterOrDigit")
+end
+
+def xdigit
+
+_applyWithArgs("regch", "0-9a-fA-F")
+end
+
+def word
+
+_or(proc { _apply("alpha") }, proc { _applyWithArgs("exactly", "_") })
 end
 end
 
@@ -136,8 +151,8 @@ x = nil
 end
 
 def Rule
-name = ls = body = nil
-(name = _apply("anything");ls = _apply("anything");body = _apply("trans"); ['Rule', name, ls, body] )
+name = ls = ar = body = nil
+(name = _apply("anything");ls = _apply("anything");ar = _apply("anything");body = _apply("trans"); ['Rule', name, ls,ar, body] )
 end
 
 def initialize_hook
@@ -332,7 +347,7 @@ end
 
 def args
 xs = nil
-_or(proc { (xs = _apply("hostExpr");xs ) }, proc { (_apply("empty");"" ) })
+_or(proc { (_xnot { _apply("space") };xs = _apply("hostExpr");xs ) }, proc { (_apply("empty");"" ) })
 end
 
 def application
@@ -357,12 +372,17 @@ end
 
 def optIter
 x = nil
-(x = _apply("anything");_or(proc { (_applyWithArgs("token", "*");['Many',        x]) }, proc { (_applyWithArgs("token", "+");['Many1',       x] ) }, proc { (_applyWithArgs("token", "?");_xnot { _apply("inlineHostExpr") };['App','perhaps', x] ) }, proc { (_apply("empty");x ) }))
+(x = _apply("anything");_or(proc { (_applyWithArgs("token", "*");['Many',        x]) }, proc { (_applyWithArgs("token", "+");['Many1',       x] ) }, proc { (_applyWithArgs("token", "?");_xnot { _apply("inlineHostExpr") };['Or', x,['App','empty']] ) }, proc { (_apply("empty");x ) }))
+end
+
+def binding
+x = n = nil
+(x = _apply("anything");_applyWithArgs("exactly", ":");n = _apply("name");_or(proc { (_applyWithArgs("exactly", "[");_applyWithArgs("exactly", "]");@arrays << n; ['Append', n, x] ) }, proc { (_apply("empty");@locals << n; ['Set', n, x]) }))
 end
 
 def expr3
-x = x = n = n = nil
-_or(proc { (x = _apply("expr2");x = _applyWithArgs("optIter", x);_or(proc { (_applyWithArgs("exactly", ":");n = _apply("name");(@locals << n; ['Set', n, x]) ) }, proc { (_apply("empty");x) })) }, proc { (_applyWithArgs("token", ":");n = _apply("name");(@locals << n; ['Set', n, ['App', 'anything']]) ) })
+x = x = nil
+_or(proc { (x = _apply("expr2");x = _applyWithArgs("optIter", x);_or(proc { _applyWithArgs("binding", x) }, proc { (_apply("empty");x) })) }, proc { (_apply("spaces"); x=['App','anything'];_applyWithArgs("binding", x)) })
 end
 
 def expr2
@@ -382,7 +402,7 @@ end
 
 def rule
 n = x = xs = nil
-(_xlookahead { n = _apply("ruleName") };@locals = [];x = _applyWithArgs("rulePart", n);xs = _xmany { (_apply("ruleSep");_applyWithArgs("rulePart", n)) };['Rule', n, @locals, ['Or', x, *xs]] )
+(_xlookahead { n = _apply("ruleName") };@locals = []; @arrays = [];x = _applyWithArgs("rulePart", n);xs = _xmany { (_apply("ruleSep");_applyWithArgs("rulePart", n)) };['Rule', n, @locals,@arrays, ['Or', x, *xs]] )
 end
 
 def rulePart
@@ -448,6 +468,11 @@ n = v = nil
 (n = _apply("anything");v = _apply("trans"); "#{n} = #{v}" )
 end
 
+def Append
+n = v = nil
+(n = _apply("anything");v = _apply("trans"); "#{n} << #{v}" )
+end
+
 def Not
 x = nil
 (x = _apply("trans"); "_xnot { #{x} }" )
@@ -464,8 +489,8 @@ x = nil
 end
 
 def Rule
-name = ls = body = nil
-(name = _apply("anything");ls = _apply("locals");body = _apply("trans"); "def #{name}\n#{ls}\n#{body}\nend\n" )
+name = ls = ars = body = nil
+(name = _apply("anything");ls = _apply("locals");ars = _apply("arrays");body = _apply("trans"); "def #{name}\n#{ls}\n#{body}\nend\n" )
 end
 
 def Grammar
@@ -476,6 +501,11 @@ end
 def locals
 vs = nil
 _or(proc { (_xform { vs = _xmany1 { _apply("anything") } }; vs.map { |v| "#{v} = " }.join('') + 'nil' ) }, proc { (_xform { proc {} }; '' ) })
+end
+
+def arrays
+vs = nil
+_or(proc { (_xform { vs = _xmany1 { _apply("anything") } }; vs.map { |v| "#{v} = " }.join('') + '[]' ) }, proc { (_xform { proc {} }; '' ) })
 end
 
 def transFn

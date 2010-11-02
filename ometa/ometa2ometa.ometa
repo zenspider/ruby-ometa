@@ -1,4 +1,3 @@
-#standard ee85c6ad734a1a680f4c65a0432330c61232f14f 
 ometa RubyOMeta2OMeta {
   trans [:t apply(t):ans]          =   -> { ans },
   App  'super' anything+:args      =   -> { "_superApplyWithArgs(#{args * ', '})" },
@@ -6,19 +5,21 @@ ometa RubyOMeta2OMeta {
   App  :rule                       =   -> { "#{rule}" },
   Act  :expr                       =   -> { "->{#{expr}}" },
   Pred :expr                       =   -> { "&{#{expr}}" },
-  Or   trans*:xs                 =   -> { xs * "|" },
-  And  notLast("trans")*:xs trans:y= -> { xs * " "+" #{y}" },
+  Or   trans*:xs                 =   -> {"("+ xs * "|"+")" },
+  And  notLast("trans")*:xs trans:y= -> {"("+ xs * " "+" #{y}"+ ")"},
   And                              =   -> { "" },
   Many  trans:x                    =   -> { "#{x}*" },
   Many1 trans:x                    =   -> { "#{x}+" },
-  Set   :n trans:v                 =   -> { "#{v}:#{n}" },
-  Not   trans:x                    =   -> { "~#{x}" },
+  Set   :n trans:v                 =   -> { "(#{v}:#{n})" },
+  Append :n trans:v								 =   -> { "(#{v}:#{n}[])" },
+	Not   trans:x                    =   -> { "~#{x}" },
   Lookahead trans:x                =   -> { "& #{x} " },
   Form  trans:x                    =   -> { "[ #{x} ]" },
-  Rule  :name locals:ls trans:body =   -> { "#{name} = #{body}\n" },
+  Rule  :name locals:ls locals:ars trans:body =   -> { "#{name} = #{body}\n" },
   Grammar :name :sName
           trans*:rules             =   -> { "ometa #{name} <: #{sName} { #{rules * ','} }" },
   locals  = [anything+:vs]            -> { vs.map { |v| "#{v} = " }.join('') + 'nil' }
-          | []                        -> { '' }
+          | []                        -> { '' },
+	euhc = aa (aa:x[])*
 }
 

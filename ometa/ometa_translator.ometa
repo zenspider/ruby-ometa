@@ -10,15 +10,18 @@ ometa RubyOMetaTranslator {
   And  notLast("trans")*:xs trans:y= -> { "(#{(xs + [y]) * ';'})" },
   And                              =   -> { "proc {}" },
   Many  trans:x                    =   -> { "_xmany { #{x} }" },
-  Many1 trans:x                    =   -> { "_xmany1 { #{x} }" },
+	Many1 trans:x                    =   -> { "_xmany1 { #{x} }" },
   Set   :n trans:v                 =   -> { "#{n} = #{v}" },
-  Not   trans:x                    =   -> { "_xnot { #{x} }" },
+  Append :n trans:v								 = 	 -> { "#{n} << #{v}" },
+	Not   trans:x                    =   -> { "_xnot { #{x} }" },
   Lookahead trans:x                =   -> { "_xlookahead { #{x} }" },
   Form  trans:x                    =   -> { "_xform { #{x} }" },
-  Rule  :name locals:ls trans:body =   -> { "def #{name}\n#{ls}\n#{body}\nend\n" },
+  Rule  :name locals:ls arrays:ars trans:body =   -> { "def #{name}\n#{ls}\n#{body}\nend\n" },
   Grammar :name :sName
           trans*:rules             =   -> { "Class.new(#{sName}) do\n@name = #{name.inspect}\n#{rules * "\n"}end" },
   locals  = [anything+:vs]            -> { vs.map { |v| "#{v} = " }.join('') + 'nil' }
+          | []                        -> { '' },
+  arrays  = [anything+:vs]            -> { vs.map { |v| "#{v} = " }.join('') + '[]' }
           | []                        -> { '' },
   transFn = trans:x                   -> { "proc { #{x} }" }
 }
