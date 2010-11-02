@@ -29,7 +29,7 @@ ometa OMetaParser <: OMeta {
 ,
   inlineHostExpr = BSRubyParser::semAction2:r              BSRubyTranslator::trans(r)
 ,
-  args           = hostExpr:xs              ->  xs 
+  args           = ~space hostExpr:xs              ->  xs 
                  | empty                                               ->  "" 
 ,
   application    = 	name:klas "::" name:rule args:as	 								 ->  ['App', 'foreign',klas,rule.inspect, *as] 
@@ -43,13 +43,15 @@ ometa OMetaParser <: OMeta {
 ,
   optIter :x     = "*"                                                 ->  ['Many',        x]
                  | "+"                                                 ->  ['Many1',       x] 
-                 | "?" ~inlineHostExpr																								 ->  ['App','perhaps', x] 
+                 | "?" ~inlineHostExpr																 ->  ['Or', x,['App','empty']] 
 								 | empty                                               ->  x 
 ,
-  expr3          = expr2:x optIter(x):x ( ':' name:n                 ->  (@locals << n; ['Set', n, x]) 
-                                          | empty                      -> x
-                                          )
-                 | ":" name:n                                          ->  (@locals << n; ['Set', n, ['App', 'anything']]) 
+	binding :x     = ':' name:n  ( '[' ']'  ->  @arrays << n; ['Append', n, x] 
+															 | empty    ->  @locals << n; ['Set', n, x]
+															 )
+,
+  expr3          = expr2:x optIter(x):x (binding(x) |empty ->{x}) 
+									 | spaces ->{ x=['App','anything']}  binding(x)
 ,
   expr2          = "~" expr2:x                                         ->  ['Not',         x] 
                  | "&" ~inlineHostExpr expr1:x                         ->  ['Lookahead',   x] 
@@ -66,8 +68,8 @@ ometa OMetaParser <: OMeta {
   ruleName       = name
                  | spaces tsString
 ,
-  rule           = &(ruleName:n) -> @locals = []
-                     rulePart(n):x (ruleSep rulePart(n))*:xs           ->  ['Rule', n, @locals, ['Or', x, *xs]] 
+  rule           = &(ruleName:n) -> @locals = []; @arrays = []
+                     rulePart(n):x (ruleSep rulePart(n))*:xs           ->  ['Rule', n, @locals,@arrays, ['Or', x, *xs]] 
 ,
   rulePart :rn   = ruleName:n &{n == rn} expr4:b1 ( "=" expr:b2        ->  ['And', b1, b2] 
                                                   | empty              ->  b1 
