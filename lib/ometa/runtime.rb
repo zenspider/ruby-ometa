@@ -309,19 +309,6 @@ class OMetaCore
   end
 
   #//  some useful "derived" rules
-  def exactly
-    wanted = _apply("anything")
-    if wanted == _apply("anything")
-      return wanted
-    end
-    raise Fail #throw :fail, true
-  end
-
-  def firstAndRest
-    first = _apply 'anything'
-    rest = _apply 'anything'
-    _xmany(_apply(first)) { _apply rest }
-  end
 
   def seq
     xs = _apply 'anything'
@@ -330,13 +317,6 @@ class OMetaCore
     end
     xs.each { |obj| _applyWithArgs 'exactly', obj }
     xs
-  end
-
-  def notLast
-    rule = _apply("anything")
-    r    = _apply(rule)
-    _xlookahead { _apply(rule) }
-    return r
   end
 
   def initialize(input)
@@ -376,26 +356,6 @@ class OMetaCore
   end
 
   # ----
-
-  def listOf
-    rule  = _apply("anything")
-    delim = _apply("anything")
-    _or(proc {
-          r = _apply(rule)
-          _xmany(r) {
-            _apply(delim)
-            _apply(rule)
-          }
-        },
-        proc { [] }
-        )
-  end
-
-  def token
-    cs = _apply("anything")
-    _apply("spaces")
-    return _applyWithArgs("seq", cs)
-  end
 
   def parse
     rule = _apply("anything"),

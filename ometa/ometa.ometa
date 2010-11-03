@@ -32,4 +32,15 @@ ometa OMeta <: OMetaCore{
 	xdigit = <0-9a-fA-F>
 
 	word = alpha | '_'
+
+	exactly :wanted = :got -> wanted == got ? wanted : (raise Fail)
+
+	notLast :rule = apply(rule):r &apply(rule) -> r
+
+	token :cs = spaces seq(cs)
+
+	firstAndRest :first :rest = apply(first):f apply(rest)*:r -> r.unshift(f)
+
+	listOf :rule :delim =  apply(rule):f (apply(delim) apply(rule))*:r -> r.unshift(f)
+												 | empty -> []
 }
