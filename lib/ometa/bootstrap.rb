@@ -86,6 +86,31 @@ def word
 
 _or(proc { _apply("alpha") }, proc { _applyWithArgs("exactly", "_") })
 end
+
+def exactly
+wanted = got = nil
+(wanted = _apply("anything");got = _apply("anything");wanted == got ? wanted : (raise Fail))
+end
+
+def notLast
+rule = r = nil
+(rule = _apply("anything");r = _applyWithArgs("apply", rule);_xlookahead { _applyWithArgs("apply", rule) };r)
+end
+
+def token
+cs = nil
+(cs = _apply("anything");_apply("spaces");_applyWithArgs("seq", cs))
+end
+
+def firstAndRest
+first = rest = f = r = nil
+(first = _apply("anything");rest = _apply("anything");f = _applyWithArgs("apply", first);r = _xmany { _applyWithArgs("apply", rest) };r.unshift(f))
+end
+
+def listOf
+rule = delim = f = r = nil
+(rule = _apply("anything");delim = _apply("anything");_or(proc { (f = _applyWithArgs("apply", rule);r = _xmany { (_applyWithArgs("apply", delim);_applyWithArgs("apply", rule)) };r.unshift(f)) }, proc { (_apply("empty");[]) }))
+end
 end
 
 NullOptimizer = Class.new(OMeta) do
@@ -262,6 +287,11 @@ end
 def semAction
 
 _or(proc { _apply("semAction2") }, proc { _apply("semAction1") })
+end
+
+def omproc
+x = nil
+(_applyWithArgs("exactly", "`");x = _xmany { (_xnot { _applyWithArgs("exactly", "`") };_apply("eChar")) };_applyWithArgs("exactly", "`");x)
 end
 end
 

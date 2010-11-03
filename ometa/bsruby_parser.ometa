@@ -14,6 +14,6 @@ ometa BSRubyParser <: OMeta {
   innerBraces    = '{' inside*:xs '}'                     -> { "{#{xs.join('')}}" },
   outerBraces    = '{' inside*:xs '}'                     -> { xs.join('') },
   semAction2     = spaces outerBraces,
-  semAction      = semAction2 | semAction1
+  semAction      = semAction2 | semAction1,
+	omproc =  '`' ( ~'`' eChar )*:x '`' ->x
 }
-
