@@ -175,6 +175,11 @@ x = nil
 (x = _apply("trans"); ['Form',      x] )
 end
 
+def Key
+name = x = nil
+(name = _apply("anything");x = _apply("trans"); ['Key',name,			x] )
+end
+
 def Rule
 name = ls = ar = body = nil
 (name = _apply("anything");ls = _apply("anything");ar = _apply("anything");body = _apply("trans"); ['Rule', name, ls,ar, body] )
@@ -421,8 +426,8 @@ _or(proc { (_applyWithArgs("token", "~");x = _apply("expr2");['Not',         x] 
 end
 
 def expr1
-x = x = x = x = x = nil
-_or(proc { _apply("application") }, proc { (_applyWithArgs("token", "->");x = _apply("atomicHostExpr");['Act',         x]) }, proc { (_applyWithArgs("token", "&");x = _apply("inlineHostExpr");['Pred',        x]) }, proc { (_apply("spaces");_or(proc { _apply("characters") }, proc { _apply("sCharacters") }, proc { _apply("string") }, proc { _apply("number") })) }, proc { (_applyWithArgs("token", "[");x = _apply("expr");_applyWithArgs("token", "]");['Form', x] ) }, proc { (_applyWithArgs("token", "<");x = _xmany1 { (_xnot { _applyWithArgs("token", ">") };_apply("eChar")) };_applyWithArgs("token", ">");['App', 'regch', x.join('').inspect] ) }, proc { (_applyWithArgs("token", "(");x = _apply("expr");_applyWithArgs("token", ")");x ) })
+var = x = x = x = x = x = x = nil
+_or(proc { _apply("application") }, proc { (_applyWithArgs("token", "@");var = _apply("name");_applyWithArgs("token", "=>");x = _apply("application");['Key',  var,   x]) }, proc { (_applyWithArgs("token", "->");x = _apply("atomicHostExpr");['Act',         x]) }, proc { (_applyWithArgs("token", "&");x = _apply("inlineHostExpr");['Pred',        x]) }, proc { (_apply("spaces");_or(proc { _apply("characters") }, proc { _apply("sCharacters") }, proc { _apply("string") }, proc { _apply("number") })) }, proc { (_applyWithArgs("token", "[");x = _apply("expr");_applyWithArgs("token", "]");['Form', x] ) }, proc { (_applyWithArgs("token", "<");x = _xmany1 { (_xnot { _applyWithArgs("token", ">") };_apply("eChar")) };_applyWithArgs("token", ">");['App', 'regch', x.join('').inspect] ) }, proc { (_applyWithArgs("token", "(");x = _apply("expr");_applyWithArgs("token", ")");x ) })
 end
 
 def ruleName
@@ -526,6 +531,11 @@ end
 def Form
 x = nil
 (x = _apply("trans"); "_xform { #{x} }" )
+end
+
+def Key
+name = x = nil
+(name = _apply("anything");x = _apply("transFn");	"_key(#{name.inspect},#{x})"	)
 end
 
 def Rule

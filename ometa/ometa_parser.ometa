@@ -57,7 +57,8 @@ ometa OMetaParser <: OMeta {
                  | "&" ~inlineHostExpr expr1:x                         ->  ['Lookahead',   x] 
                  | expr1
 ,
-  expr1          = application 
+  expr1          = application
+								 | "@" name:var "=>" application:x									 ->  ['Key',  var,   x]
                  | "->" atomicHostExpr:x                       ->  ['Act',         x]
 								 | "&"  inlineHostExpr:x                       ->  ['Pred',        x]
 								 | spaces (characters | sCharacters | string | number)

@@ -274,6 +274,17 @@ class OMetaCore
   def _xmany1(&block)
     _xmany block.call, &block
   end
+	def _key(key,&block)
+		oldInput = @input
+		src=@input.instance_variable_get("@#{key}")
+		v=src.call(key) if src.respond_to? key
+		v||=src[key] if src.respond_to? "[]"
+		@input = LazyStream.new UNDEFINED, UNDEFINED, ReadStream.new(v)
+		r =yield
+		_apply "end"
+		@input = oldInput
+		r
+	end
 
   def _xform
     v = _apply "anything"
@@ -283,7 +294,7 @@ class OMetaCore
     r = yield
     _apply "end"
     @input = oldInput
-    v
+    r
   end
 
   #// some basic rules
