@@ -7,6 +7,13 @@ look at doc/ometa
 = TODO
 
 * reporting of file position
+* error message should show begin of last infinite rule
+* error handler to access stack?
+* integrate @method so we can use [] also on ordinary objects
+* add formating capabilities for ometa2ometa
+* make parametrized rules application ordinary calls istead prefixing with arguments
+* add switch optimalization see pappy
+* add indirect recursion support
 
 * perhaps cache compiled rb files as "#{ometa_filename}.rb.cache" or
   similar, and use them based on mtime / flag combination.
