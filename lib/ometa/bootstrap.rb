@@ -246,7 +246,7 @@ end
 
 def outerBra
 xs = nil
-(_applyWithArgs("exactly", "(");xs = _xmany { _apply("insideBra") };_applyWithArgs("exactly", ")"); xs*"" )
+(_applyWithArgs("exactly", "(");xs = _xmany { _apply("insideBra") };_applyWithArgs("exactly", ")"); [ xs] )
 end
 
 def expr
@@ -460,12 +460,17 @@ end
 
 def App
 args = rule = args = rule = nil
-_or(proc { (_applyWithArgs("exactly", "super");args = _xmany1 { _apply("arg") }; "_superApplyWithArgs(#{args*", "})" ) }, proc { (rule = _apply("anything");args = _xmany1 { _apply("arg") };"_applyWithArgs(#{rule.inspect}, #{args*", "})" ) }, proc { (rule = _apply("anything"); "_apply(#{rule.inspect})" ) })
+_or(proc { (_applyWithArgs("exactly", "super");args = _xmany1 { _apply("arg") }; "_superApplyWithArgs(#{args*", "})" ) }, proc { (rule = _apply("anything");args = _xmany1 { _apply("arg") }; "_applyWithArgs(#{rule.inspect}, #{args*", "})" ) }, proc { (rule = _apply("anything"); "_apply(#{rule.inspect})" ) })
 end
 
 def arg
-c = s = x = nil
-_or(proc { (c = _apply("anything");c) }, proc { (s = _apply("anything");_pred(s.is_a? String);","+s) }, proc { (x = _apply("transFn");","+x ) })
+m = s = nil
+_or(proc { (_xform { m = _xmany { _apply("ag") } };m*"") }, proc { (s = _apply("anything");_pred(s.is_a? String);s) })
+end
+
+def ag
+t = nil
+_or(proc { _apply("char") }, proc { (_xform { t = _apply("transFn") };t) })
 end
 
 def Act

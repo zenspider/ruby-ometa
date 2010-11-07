@@ -2,12 +2,14 @@
 ometa RubyOMetaTranslator {
   trans [:t apply(t):ans]          =   -> { ans },
   App  'super' arg+:args      =   -> { "_superApplyWithArgs(#{args*", "})" },
-  App  :rule   arg+:args      =   -> {"_applyWithArgs(#{rule.inspect}, #{args*", "})" },
+  App  :rule   arg+:args      =   -> { "_applyWithArgs(#{rule.inspect}, #{args*", "})" },
   App  :rule                       =   -> { "_apply(#{rule.inspect})" },	
-	arg = :c -> c
-				| :s &{s.is_a? String} ->","+s
-	      | transFn:x -> ","+x 
+	arg = [  ag*:m ] -> m*""
+				| :s &{s.is_a? String} -> s
 	,
+	ag= char
+	 | [ transFn:t ] -> t
+,
   Act  :expr                       =   -> { expr },
   Pred :expr                       =   -> { "_pred(#{expr})" },
   Or   transFn*:xs                 =   -> { "_or(#{xs * ', '})" },
