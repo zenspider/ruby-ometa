@@ -16,7 +16,7 @@ end
 
 desc 'create new standard'
 task :standard do
-	commit=`git rev-parse HEAD`.strip
+	commit=`git rev-parse --short HEAD`.strip
 	mkdir "standards/#{commit}"
 	cp "lib/ometa/bootstrap.rb","standards/#{commit}"
 end
