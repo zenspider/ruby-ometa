@@ -6,7 +6,7 @@ ometa BSRubyParser <: OMeta {
 	nonBraChar   = ~'(' ~')' char,
   insideBra   = omproc:o ->{[o]} | innerBra | nonBraChar,
   innerBra    = '(' insideBra*:xs ')'                     -> {"("+xs*"" +")" },
-  outerBra    = '(' insideBra*:xs ')'                     -> { xs*"" },
+  outerBra    = '(' insideBra*:xs ')'                     -> { [ xs] },
 	expr           = outerBra,
   semAction1     = spaces (~seq("\n") anything)*:xs    -> { xs.join('') },
   nonBraceChar   = ~'{' ~'}' char,
