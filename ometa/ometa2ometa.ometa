@@ -20,6 +20,6 @@ ometa RubyOMeta2OMeta {
           trans*:rules             =   -> { "ometa #{name} <: #{sName} { #{rules * ','} }" },
   locals  = [anything+:vs]            -> { vs.map { |v| "#{v} = " }.join('') + 'nil' }
           | []                        -> { '' },
-	euhc = aa (aa:x[])*
+	euhc = aa (aa:x[])* ana(`foo | bar`)
 }
 

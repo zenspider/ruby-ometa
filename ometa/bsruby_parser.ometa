@@ -4,9 +4,9 @@ ometa BSRubyParser <: OMeta {
                  | char,
   tsString       = '\'' (~'\'' eChar)*:xs '\''            -> { xs.join('') },
 	nonBraChar   = ~'(' ~')' char,
-  insideBra         = innerBra | nonBraChar,
-  innerBra    = '(' insideBra*:xs ')'                     -> { "{#{xs.join('')}}" },
-  outerBra    = '(' insideBra*:xs ')'                     -> { xs.join('') },
+  insideBra   = omproc:o ->{[o]} | innerBra | nonBraChar,
+  innerBra    = '(' insideBra*:xs ')'                     -> {"("+xs*"" +")" },
+  outerBra    = '(' insideBra*:xs ')'                     -> { xs*"" },
 	expr           = outerBra,
   semAction1     = spaces (~seq("\n") anything)*:xs    -> { xs.join('') },
   nonBraceChar   = ~'{' ~'}' char,
@@ -15,5 +15,5 @@ ometa BSRubyParser <: OMeta {
   outerBraces    = '{' inside*:xs '}'                     -> { xs.join('') },
   semAction2     = spaces outerBraces,
   semAction      = semAction2 | semAction1,
-	omproc =  '`' ( ~'`' eChar )*:x '`' ->x
+	omproc =  '`' OMetaParser::expr:x '`' -> x
 }
