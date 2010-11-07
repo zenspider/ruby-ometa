@@ -235,18 +235,18 @@ def nonBraChar
 end
 
 def insideBra
-
-_or(proc { _apply("innerBra") }, proc { _apply("nonBraChar") })
+o = nil
+_or(proc { (o = _apply("omproc");[o]) }, proc { _apply("innerBra") }, proc { _apply("nonBraChar") })
 end
 
 def innerBra
 xs = nil
-(_applyWithArgs("exactly", "(");xs = _xmany { _apply("insideBra") };_applyWithArgs("exactly", ")"); "{#{xs.join('')}}" )
+(_applyWithArgs("exactly", "(");xs = _xmany { _apply("insideBra") };_applyWithArgs("exactly", ")");"("+xs*"" +")" )
 end
 
 def outerBra
 xs = nil
-(_applyWithArgs("exactly", "(");xs = _xmany { _apply("insideBra") };_applyWithArgs("exactly", ")"); xs.join('') )
+(_applyWithArgs("exactly", "(");xs = _xmany { _apply("insideBra") };_applyWithArgs("exactly", ")"); xs*"" )
 end
 
 def expr
@@ -291,7 +291,7 @@ end
 
 def omproc
 x = nil
-(_applyWithArgs("exactly", "`");x = _xmany { (_xnot { _applyWithArgs("exactly", "`") };_apply("eChar")) };_applyWithArgs("exactly", "`");x)
+(_applyWithArgs("exactly", "`");x = _applyWithArgs("foreign", OMetaParser, "expr");_applyWithArgs("exactly", "`");x)
 end
 end
 
@@ -337,7 +337,7 @@ end
 
 def characters
 xs = nil
-(_applyWithArgs("exactly", "`");_applyWithArgs("exactly", "`");xs = _xmany { (_xnot { (_applyWithArgs("exactly", "'");_applyWithArgs("exactly", "'")) };_apply("eChar")) };_applyWithArgs("exactly", "'");_applyWithArgs("exactly", "'");['App', 'seq',     xs.join('').inspect] )
+(_applyWithArgs("exactly", "'");_applyWithArgs("exactly", "'");xs = _xmany { (_xnot { (_applyWithArgs("exactly", "'");_applyWithArgs("exactly", "'")) };_apply("eChar")) };_applyWithArgs("exactly", "'");_applyWithArgs("exactly", "'");['App', 'seq',     xs.join('').inspect] )
 end
 
 def sCharacters
@@ -347,7 +347,7 @@ end
 
 def string
 xs = nil
-(xs = _or(proc { (_or(proc { _applyWithArgs("exactly", "#") }, proc { _applyWithArgs("exactly", "`") });_apply("tsName")) }, proc { _apply("tsString") });['App', 'exactly', xs.inspect] )
+(xs = _or(proc { (_applyWithArgs("exactly", "#");_apply("tsName")) }, proc { _apply("tsString") });['App', 'exactly', xs.inspect] )
 end
 
 def number
@@ -460,7 +460,12 @@ end
 
 def App
 args = rule = args = rule = nil
-_or(proc { (_applyWithArgs("exactly", "super");args = _xmany1 { _apply("anything") }; "_superApplyWithArgs(#{args * ', '})" ) }, proc { (rule = _apply("anything");args = _xmany1 { _apply("anything") }; "_applyWithArgs(#{rule.inspect}, #{args * ', '})" ) }, proc { (rule = _apply("anything"); "_apply(#{rule.inspect})" ) })
+_or(proc { (_applyWithArgs("exactly", "super");args = _xmany1 { _apply("arg") }; "_superApplyWithArgs(#{args*", "})" ) }, proc { (rule = _apply("anything");args = _xmany1 { _apply("arg") };"_applyWithArgs(#{rule.inspect}, #{args*", "})" ) }, proc { (rule = _apply("anything"); "_apply(#{rule.inspect})" ) })
+end
+
+def arg
+c = s = x = nil
+_or(proc { (c = _apply("anything");c) }, proc { (s = _apply("anything");_pred(s.is_a? String);","+s) }, proc { (x = _apply("transFn");","+x ) })
 end
 
 def Act
