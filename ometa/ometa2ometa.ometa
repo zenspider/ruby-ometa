@@ -1,8 +1,11 @@
 ometa RubyOMeta2OMeta {
   trans [:t apply(t):ans]          =   -> { ans },
-  App  'super' anything+:args      =   -> { "_superApplyWithArgs(#{args * ', '})" },
-  App  :rule   anything+:args      =   -> { "#{rule}(#{args})" },
+  App  'super'  [arg+:args]      =   -> { "_superApplyWithArgs(#{args * ', '})" },
+  App  :rule    [arg+:args]      =   -> { "#{rule}(#{args})" },
   App  :rule                       =   -> { "#{rule}" },
+	arg = char 
+				| [ trans:t ] -> '`'+t+'`'
+	,	
   Act  :expr                       =   -> { "->{#{expr}}" },
   Pred :expr                       =   -> { "&{#{expr}}" },
   Or   trans*:xs                 =   -> {"("+ xs * "|"+")" },
