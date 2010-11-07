@@ -2,7 +2,11 @@
 
 Briefly what OMeta is, some links to the ometajs stuff.
 
+look at doc/ometa
+
 = TODO
+
+* reporting of file position
 
 * perhaps cache compiled rb files as "#{ometa_filename}.rb.cache" or
   similar, and use them based on mtime / flag combination.

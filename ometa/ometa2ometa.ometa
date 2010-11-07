@@ -18,11 +18,12 @@ ometa RubyOMeta2OMeta {
 	Not   trans:x                    =   -> { "~#{x}" },
   Lookahead trans:x                =   -> { "& #{x} " },
   Form  trans:x                    =   -> { "[ #{x} ]" },
-  Rule  :name locals:ls locals:ars trans:body =   -> { "#{name} = #{body}\n" },
+  Key		:name trans:x							 =   -> { "(@#{name}=>#{x})"},
+	Rule  :name locals:ls locals:ars trans:body =   -> { "#{name} = #{body}\n" },
   Grammar :name :sName
           trans*:rules             =   -> { "ometa #{name} <: #{sName} { #{rules * ','} }" },
   locals  = [anything+:vs]            -> { vs.map { |v| "#{v} = " }.join('') + 'nil' }
           | []                        -> { '' },
-	euhc = aa (aa:x[])* ana(`foo | bar`)
+	euhc = @ada=>axe aa (aa:x[])* ana(`foo | bar`)
 }
 
