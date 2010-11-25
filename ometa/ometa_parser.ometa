@@ -65,11 +65,11 @@ ometa OMetaParser <: OMeta {
                  | "&"  inlineHostExpr:x                       ->  ['Pred',        x]
                  | spaces (characters | sCharacters | string | number)
                  | "[" expr:x "]"                                      ->  ['Form', x]
-                 | "%" (className | empty ->{"Array"}):c '[' klasargs:args "]" -> Klass.new(c,args)
+                 | "%" (className | empty ->{"Array"}):c '[' klasargs:args "]" %Klass[c,args]
                  | "<" (~">" eChar)+:x  ">"                            ->  ['App', 'regch', x.join('').inspect] 
                  | "(" expr:x ")"                                      ->  x 
 
-	klasargs = <^\]>*:a -> a*""
+	klasargs = <^\\]>*:a -> a*""
 
   ruleName       = name
                  | spaces tsString

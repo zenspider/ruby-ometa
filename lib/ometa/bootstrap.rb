@@ -527,7 +527,7 @@ end
 def klasargs
 a = nil
 
-(a = _xmany { _applyWithArgs("regch", "^]") };a*"")
+(a = _xmany { _applyWithArgs("regch", "^\\]") };a*"")
 end
 
 def ruleName
@@ -560,7 +560,7 @@ RubyOMetaTranslator = Class.new(OMeta) do
 def trans
 name = args = t = ans = nil
 
-_or(proc { (_xform { (_applyWithArgs("clas", "Klass");puts "kls";name = _key("name",proc { _apply("anything") });args = _key("args",proc { _apply("anything") });puts name) };"#{name}.new(#{args})") }, proc { (_xform { (t = _apply("anything");ans = _applyWithArgs("apply", t)) }; ans ) })
+_or(proc { (_xform { (_applyWithArgs("clas", "Klass");name = _key("name",proc { _apply("anything") });args = _key("args",proc { _apply("anything") })) };"#{name}.new(#{args})") }, proc { (_xform { (t = _apply("anything");ans = _applyWithArgs("apply", t)) }; ans ) })
 end
 
 def App
