@@ -328,12 +328,18 @@ class OMetaCore
 
   def seq
     xs = _apply 'anything'
-    if String === xs
-      xs = Character::StringWrapper.new xs
-    end
-    xs.each { |obj| _applyWithArgs 'exactly', obj }
-    xs
-  end
+		_or(
+			proc{
+				_applyWithArgs('exactly',xs)
+			}	, proc{
+				if String === xs
+					xs = Character::StringWrapper.new xs
+				end
+				xs.each { |obj| _applyWithArgs 'exactly', obj }
+			}
+		)
+		xs
+	end
 
   def initialize(input)
     @input = input

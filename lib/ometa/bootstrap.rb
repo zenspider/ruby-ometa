@@ -133,6 +133,12 @@ rule = delim = f = r = nil
 
 (rule = _apply("anything");delim = _apply("anything");_or(proc { (f = _applyWithArgs("apply", rule);r = _xmany { (_applyWithArgs("apply", delim);_applyWithArgs("apply", rule)) };r.unshift(f)) }, proc { (_apply("empty");[]) }))
 end
+
+def clas
+cls = nil
+
+(cls = _apply("anything");_pred(@input.is_a? Class.const_get(cls)))
+end
 end
 
 NullOptimizer = Class.new(OMeta) do
@@ -380,6 +386,12 @@ def nameRest
 _or(proc { _apply("nameFirst") }, proc { _apply("digit") })
 end
 
+def className
+xs = nil
+
+(xs = _applyWithArgs("firstAndRest", "upper","nameRest");leterize(xs.join('')))
+end
+
 def tsName
 xs = nil
 
@@ -507,9 +519,9 @@ _or(proc { (_applyWithArgs("token", "~");x = _apply("expr2");['Not',         x] 
 end
 
 def expr1
-var = x = x = x = x = x = x = nil
+var = x = x = x = x = c = x = x = x = nil
 
-_or(proc { _apply("application") }, proc { (_applyWithArgs("token", "@");var = _apply("name");_applyWithArgs("token", "=>");x = _apply("application");['Key',  var,   x]) }, proc { (_applyWithArgs("token", "->");x = _apply("atomicHostExpr");['Act',         x]) }, proc { (_applyWithArgs("token", "&");x = _apply("inlineHostExpr");['Pred',        x]) }, proc { (_apply("spaces");_or(proc { _apply("characters") }, proc { _apply("sCharacters") }, proc { _apply("string") }, proc { _apply("number") })) }, proc { (_applyWithArgs("token", "[");x = _apply("expr");_applyWithArgs("token", "]");['Form', x] ) }, proc { (_applyWithArgs("token", "<");x = _xmany1 { (_xnot { _applyWithArgs("token", ">") };_apply("eChar")) };_applyWithArgs("token", ">");['App', 'regch', x.join('').inspect] ) }, proc { (_applyWithArgs("token", "(");x = _apply("expr");_applyWithArgs("token", ")");x ) })
+_or(proc { _apply("application") }, proc { (_applyWithArgs("token", "@");var = _apply("name");_applyWithArgs("token", "=>");x = _apply("application");['Key',  var,   x]) }, proc { (_applyWithArgs("token", "->");x = _apply("atomicHostExpr");['Act',         x]) }, proc { (_applyWithArgs("token", "&");x = _apply("inlineHostExpr");['Pred',        x]) }, proc { (_apply("spaces");_or(proc { _apply("characters") }, proc { _apply("sCharacters") }, proc { _apply("string") }, proc { _apply("number") })) }, proc { (_applyWithArgs("token", "[");x = _apply("expr");_applyWithArgs("token", "]");['Form', x]) }, proc { (c = _apply("className");_applyWithArgs("seq", "[");x = _apply("expr");_applyWithArgs("token", "]");['Form',['And', ['App',"clas",c]  ,x]]) }, proc { (_applyWithArgs("token", "<");x = _xmany1 { (_xnot { _applyWithArgs("token", ">") };_apply("eChar")) };_applyWithArgs("token", ">");['App', 'regch', x.join('').inspect] ) }, proc { (_applyWithArgs("token", "(");x = _apply("expr");_applyWithArgs("token", ")");x ) })
 end
 
 def ruleName

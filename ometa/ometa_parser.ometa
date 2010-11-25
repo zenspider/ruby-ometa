@@ -4,7 +4,9 @@ ometa OMetaParser <: OMeta {
 
   nameRest       = nameFirst | digit
 
-  tsName         = firstAndRest("nameFirst","nameRest"):xs        ->  leterize(xs.join('')) 
+	className      = firstAndRest("upper","nameRest"):xs	                 -> leterize(xs.join(''))
+
+  tsName         = firstAndRest("nameFirst","nameRest"):xs             ->  leterize(xs.join('')) 
 
   name           = spaces tsName
 
@@ -63,7 +65,8 @@ ometa OMetaParser <: OMeta {
                  | "->" atomicHostExpr:x                       ->  ['Act',         x]
 								 | "&"  inlineHostExpr:x                       ->  ['Pred',        x]
 								 | spaces (characters | sCharacters | string | number)
-                 | "[" expr:x "]"                                      ->  ['Form', x] 
+                 | "[" expr:x "]"                                      ->  ['Form', x]
+                 | className:c '[' expr:x "]"                            ->  ['Form',['And', ['App',"clas",c]  ,x]]
                  | "<" (~">" eChar)+:x  ">"                            ->  ['App', 'regch', x.join('').inspect] 
                  | "(" expr:x ")"                                      ->  x 
 
