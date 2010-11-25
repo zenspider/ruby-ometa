@@ -53,7 +53,7 @@ D.puts parsed.inspect
 				optimized = optimizer.matchwith(parsed, 'optimizeGrammar')
 D.puts optimized.inspect
         ruby      = translator.matchwith(optimized, 'trans')
-D.puts ruby.inspect
+D.puts ruby
         # this hack remains at the moment...
         ruby.gsub! /initialize/, 'initialize_hook'
 
