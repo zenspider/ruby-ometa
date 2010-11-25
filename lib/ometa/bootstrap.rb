@@ -249,7 +249,7 @@ _or(proc { (x = _apply("trans");_apply("end");_apply("setHelped");x ) }, proc { 
 end
 
 def transInside
-t = xs = ys = x = xs = nil
+t = xs = ys = x = nil
 
 (t = _apply("anything");_or(proc { (_xform { (_applyWithArgs("exactly", t);xs = _applyWithArgs("transInside", t)) };ys = _applyWithArgs("transInside", t);_apply("setHelped");xs + ys ) }, proc { (x = _apply("trans");xs = _applyWithArgs("transInside", t);[x, *xs] ) }, proc { []  }))
 end
@@ -264,7 +264,7 @@ n = sn = rs = nil
 end
 
 def optimizeRule
-r = r = nil
+r = nil
 
 (r = _apply("anything");_xmany { r = _applyWithArgs("foreign", AndOrOptimizer, "optimize", r) }; r )
 end
@@ -471,7 +471,7 @@ _or(proc { (_xnot { _apply("space") };xs = _apply("hostExpr");xs ) }, proc { (_a
 end
 
 def application
-klas = rule = as = rule = as = nil
+klas = rule = as = nil
 
 _or(proc { (klas = _apply("name");_applyWithArgs("token", "::");rule = _apply("name");as = _apply("args");['App', 'foreign',klas,rule.inspect, *as] ) }, proc { (rule = _apply("name");as = _apply("args");['App', rule, *as] ) })
 end
@@ -507,21 +507,21 @@ x = n = e = nil
 end
 
 def expr3
-x = x = nil
+x = nil
 
 _or(proc { (x = _apply("expr2");x = _applyWithArgs("optIter", x);_or(proc { _applyWithArgs("binding", x) }, proc { (_apply("empty");x) })) }, proc { (_apply("spaces"); x=['App','anything'];_applyWithArgs("binding", x)) })
 end
 
 def expr2
-x = x = nil
+x = nil
 
 _or(proc { (_applyWithArgs("token", "~");x = _apply("expr2");['Not',         x] ) }, proc { (_applyWithArgs("token", "&");_xnot { _apply("inlineHostExpr") };x = _apply("expr1");['Lookahead',   x] ) }, proc { _apply("expr1") })
 end
 
 def expr1
-var = x = x = x = x = c = x = x = x = nil
+var = x = c = a = nil
 
-_or(proc { _apply("application") }, proc { (_applyWithArgs("token", "@");var = _apply("name");_applyWithArgs("token", "=>");x = _apply("application");['Key',  var,   x]) }, proc { (_applyWithArgs("token", "->");x = _apply("atomicHostExpr");['Act',         x]) }, proc { (_applyWithArgs("token", "&");x = _apply("inlineHostExpr");['Pred',        x]) }, proc { (_apply("spaces");_or(proc { _apply("characters") }, proc { _apply("sCharacters") }, proc { _apply("string") }, proc { _apply("number") })) }, proc { (_applyWithArgs("token", "[");x = _apply("expr");_applyWithArgs("token", "]");['Form', x]) }, proc { (c = _apply("className");_applyWithArgs("seq", "[");x = _apply("expr");_applyWithArgs("token", "]");['Form',['And', ['App',"clas",c]  ,x]]) }, proc { (_applyWithArgs("token", "<");x = _xmany1 { (_xnot { _applyWithArgs("token", ">") };_apply("eChar")) };_applyWithArgs("token", ">");['App', 'regch', x.join('').inspect] ) }, proc { (_applyWithArgs("token", "(");x = _apply("expr");_applyWithArgs("token", ")");x ) })
+_or(proc { _apply("application") }, proc { (_applyWithArgs("token", "@");var = _apply("name");x = _or(proc { (_applyWithArgs("token", "=>");_apply("application")) }, proc { (_apply("empty");['App',"anything"]) });['Key',  var,   x]) }, proc { (_applyWithArgs("token", "->");x = _apply("atomicHostExpr");['Act',         x]) }, proc { (_applyWithArgs("token", "&");x = _apply("inlineHostExpr");['Pred',        x]) }, proc { (_apply("spaces");_or(proc { _apply("characters") }, proc { _apply("sCharacters") }, proc { _apply("string") }, proc { _apply("number") })) }, proc { (_applyWithArgs("token", "[");x = _apply("expr");_applyWithArgs("token", "]");['Form', x]) }, proc { (_applyWithArgs("token", "%");c = _or(proc { _apply("className") }, proc { (_apply("empty");"Array") });_applyWithArgs("seq", "[");a = _apply("args");_applyWithArgs("token", "]");['Klass',c,e]) }, proc { (c = _apply("className");_applyWithArgs("seq", "[");x = _apply("expr");_applyWithArgs("token", "]");['Form',['And', ['App',"clas",c]  ,x]]) }, proc { (_applyWithArgs("token", "<");x = _xmany1 { (_xnot { _applyWithArgs("token", ">") };_apply("eChar")) };_applyWithArgs("token", ">");['App', 'regch', x.join('').inspect] ) }, proc { (_applyWithArgs("token", "(");x = _apply("expr");_applyWithArgs("token", ")");x ) })
 end
 
 def ruleName
@@ -533,7 +533,7 @@ end
 def rule
 n = x = xs = nil
 
-(_xlookahead { n = _apply("ruleName") };@locals = []; @arrays = [];x = _applyWithArgs("rulePart", n);xs = _xmany { (_apply("ruleSep");_applyWithArgs("rulePart", n)) };['Rule', n, @locals,@arrays, ['Or', x, *xs]] )
+(_xlookahead { n = _apply("ruleName") };@locals = []; @arrays = [];x = _applyWithArgs("rulePart", n);xs = _xmany { (_apply("ruleSep");_applyWithArgs("rulePart", n)) };['Rule', n, @locals.uniq,@arrays.uniq, ['Or', x, *xs]] )
 end
 
 def rulePart
@@ -564,7 +564,7 @@ t = ans = nil
 end
 
 def App
-args = rule = args = rule = nil
+args = rule = nil
 
 _or(proc { (_applyWithArgs("seq", "super");args = _xmany1 { _apply("arg") }; "_superApplyWithArgs(#{args*", "})" ) }, proc { (rule = _apply("anything");args = _xmany1 { _apply("arg") }; "_applyWithArgs(#{rule.inspect}, #{args*", "})" ) }, proc { (rule = _apply("anything"); "_apply(#{rule.inspect})" ) })
 end
