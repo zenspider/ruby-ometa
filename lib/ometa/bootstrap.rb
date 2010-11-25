@@ -137,7 +137,13 @@ end
 def clas
 cls = nil
 
-(cls = _apply("anything");_pred(@input.is_a? Class.const_get(cls)))
+(cls = _apply("anything");_pred(@input.stream.src.is_a? Class.const_get(cls)))
+end
+
+def foo
+
+
+Aue.new()
 end
 end
 
@@ -513,9 +519,15 @@ _or(proc { (_applyWithArgs("token", "~");x = _apply("expr2");['Not',         x] 
 end
 
 def expr1
-var = x = c = a = nil
+c = x = var = args = nil
 
-_or(proc { _apply("application") }, proc { (_applyWithArgs("token", "@");var = _apply("name");x = _or(proc { (_applyWithArgs("token", "=>");_apply("application")) }, proc { (_apply("empty");['App',"anything"]) });['Key',  var,   x]) }, proc { (_applyWithArgs("token", "->");x = _apply("atomicHostExpr");['Act',         x]) }, proc { (_applyWithArgs("token", "&");x = _apply("inlineHostExpr");['Pred',        x]) }, proc { (_apply("spaces");_or(proc { _apply("characters") }, proc { _apply("sCharacters") }, proc { _apply("string") }, proc { _apply("number") })) }, proc { (_applyWithArgs("token", "[");x = _apply("expr");_applyWithArgs("token", "]");['Form', x]) }, proc { (_applyWithArgs("token", "%");c = _or(proc { _apply("className") }, proc { (_apply("empty");"Array") });_applyWithArgs("seq", "[");a = _apply("args");_applyWithArgs("token", "]");['Klass',c,e]) }, proc { (c = _apply("className");_applyWithArgs("seq", "[");x = _apply("expr");_applyWithArgs("token", "]");['Form',['And', ['App',"clas",c]  ,x]]) }, proc { (_applyWithArgs("token", "<");x = _xmany1 { (_xnot { _applyWithArgs("token", ">") };_apply("eChar")) };_applyWithArgs("token", ">");['App', 'regch', x.join('').inspect] ) }, proc { (_applyWithArgs("token", "(");x = _apply("expr");_applyWithArgs("token", ")");x ) })
+_or(proc { (_apply("spaces");c = _apply("className");_applyWithArgs("seq", "[");x = _apply("expr");_applyWithArgs("token", "]");['Form',['And', ['App',"clas",c.inspect]  ,x]]) }, proc { _apply("application") }, proc { (_applyWithArgs("token", "@");var = _apply("name");x = _or(proc { (_applyWithArgs("token", "=>");_apply("application")) }, proc { (_apply("empty");['App',"anything"]) });['Key',  var,   x]) }, proc { (_applyWithArgs("token", "->");x = _apply("atomicHostExpr");['Act',         x]) }, proc { (_applyWithArgs("token", "&");x = _apply("inlineHostExpr");['Pred',        x]) }, proc { (_apply("spaces");_or(proc { _apply("characters") }, proc { _apply("sCharacters") }, proc { _apply("string") }, proc { _apply("number") })) }, proc { (_applyWithArgs("token", "[");x = _apply("expr");_applyWithArgs("token", "]");['Form', x]) }, proc { (_applyWithArgs("token", "%");c = _or(proc { _apply("className") }, proc { (_apply("empty");"Array") });_applyWithArgs("seq", "[");args = _apply("klasargs");_applyWithArgs("token", "]");Klass.new(c,args)) }, proc { (_applyWithArgs("token", "<");x = _xmany1 { (_xnot { _applyWithArgs("token", ">") };_apply("eChar")) };_applyWithArgs("token", ">");['App', 'regch', x.join('').inspect] ) }, proc { (_applyWithArgs("token", "(");x = _apply("expr");_applyWithArgs("token", ")");x ) })
+end
+
+def klasargs
+a = nil
+
+(a = _xmany { _applyWithArgs("regch", "^]") };a*"")
 end
 
 def ruleName
@@ -546,9 +558,9 @@ end
 RubyOMetaTranslator = Class.new(OMeta) do
 @name = "RubyOMetaTranslator"
 def trans
-t = ans = nil
+name = args = t = ans = nil
 
-(_xform { (t = _apply("anything");ans = _applyWithArgs("apply", t)) }; ans )
+_or(proc { (_xform { (_applyWithArgs("clas", "Klass");puts "kls";name = _key("name",proc { _apply("anything") });args = _key("args",proc { _apply("anything") });puts name) };"#{name}.new(#{args})") }, proc { (_xform { (t = _apply("anything");ans = _applyWithArgs("apply", t)) }; ans ) })
 end
 
 def App

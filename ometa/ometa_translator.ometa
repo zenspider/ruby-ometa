@@ -1,6 +1,7 @@
 
 ometa RubyOMetaTranslator {
-  trans [:t apply(t):ans]          =   -> { ans },
+  trans = Klass[ -> {@name:name  @args:args	->{puts name}] 	  -> {"#{name}.new(#{args})"}
+| [:t apply(t):ans]             -> { ans },
   App  'super' arg+:args      =   -> { "_superApplyWithArgs(#{args*", "})" },
   App  :rule   arg+:args      =   -> { "_applyWithArgs(#{rule.inspect}, #{args*", "})" },
   App  :rule                       =   -> { "_apply(#{rule.inspect})" },	

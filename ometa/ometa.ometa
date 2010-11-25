@@ -44,5 +44,7 @@ ometa OMeta <: OMetaCore{
 	listOf :rule :delim =  apply(rule):f (apply(delim) apply(rule))*:r -> r.unshift(f)
 												 | empty -> []
 	
-	clas :cls = &{@input.is_a? Class.const_get(cls)}
+	clas :cls = &{@input.stream.src.is_a? Class.const_get(cls)}	
+
+	foo= %Aue[]
 }
