@@ -4,7 +4,7 @@ ometa OMetaParser <: OMeta {
 
   nameRest       = nameFirst | digit
 
-	className      = firstAndRest("upper","nameRest"):xs	                 -> leterize(xs.join(''))
+  className      = firstAndRest("upper","nameRest"):xs                   -> leterize(xs.join(''))
 
   tsName         = firstAndRest("nameFirst","nameRest"):xs             ->  leterize(xs.join('')) 
 
@@ -34,10 +34,10 @@ ometa OMetaParser <: OMeta {
   args           = ~space hostExpr:xs              ->  xs 
                  | empty                                               ->  "" 
 
-  application    = 	name:klas "::" name:rule args:as	 								 ->  ['App', 'foreign',klas,rule.inspect, *as] 
-									|	name:rule args:as                                  ->  ['App', rule, *as] 
+  application    =   name:klas "::" name:rule args:as                    ->  ['App', 'foreign',klas,rule.inspect, *as] 
+                  |  name:rule args:as                                  ->  ['App', rule, *as] 
 
-	or = "|"
+  or = "|"
 
   expr           = listOf("expr4", "or"):xs                         ->  (xs.size==1 ? xs[0] : ['Or',        *xs] )
 
@@ -45,27 +45,28 @@ ometa OMetaParser <: OMeta {
 
   optIter :x     = "*"                                                 ->  ['Many',        x]
                  | "+"                                                 ->  ['Many1',       x] 
-                 | "?" ~inlineHostExpr																 ->  ['Or', x,['App','empty']] 
-								 | empty                                               ->  x 
+                 | "?" ~inlineHostExpr                                 ->  ['Or', x,['App','empty']] 
+                 | empty                                               ->  x 
 
-	binding :x     = ':' name:n  ( '[' ']'  ->  @arrays << n; ['Append', n, x] 
-															 | empty    ->  @locals << n; ['Set', n, x]
-															 )
-										| ':' inlineHostExpr:e -> @locals << "it";  ['And',['Set','it',x],['Pred',e]]
+  binding :x     = ':' name:n  ( '[' ']'  ->  @arrays << n; ['Append', n, x] 
+                               | empty    ->  @locals << n; ['Set', n, x]
+                               )
+                    | ':' inlineHostExpr:e -> @locals << "it";  ['And',['Set','it',x],['Pred',e]]
 
   expr3          = expr2:x optIter(x):x (binding(x) |empty ->{x}) 
-									 | spaces ->{ x=['App','anything']}  binding(x)
+                   | spaces ->{ x=['App','anything']}  binding(x)
 
   expr2          = "~" expr2:x                                         ->  ['Not',         x] 
                  | "&" ~inlineHostExpr expr1:x                         ->  ['Lookahead',   x] 
                  | expr1
 
   expr1          = application
-								 | "@" name:var "=>" application:x									 ->  ['Key',  var,   x]
+                 | "@" name:var ("=>" application  | empty -> {['App',"anything"]}):x  ->  ['Key',  var,   x]
                  | "->" atomicHostExpr:x                       ->  ['Act',         x]
-								 | "&"  inlineHostExpr:x                       ->  ['Pred',        x]
-								 | spaces (characters | sCharacters | string | number)
+                 | "&"  inlineHostExpr:x                       ->  ['Pred',        x]
+                 | spaces (characters | sCharacters | string | number)
                  | "[" expr:x "]"                                      ->  ['Form', x]
+                 | "%" (className | empty ->{"Array"}):c '[' args:a "]" -> ['Klass',c,e]
                  | className:c '[' expr:x "]"                            ->  ['Form',['And', ['App',"clas",c]  ,x]]
                  | "<" (~">" eChar)+:x  ">"                            ->  ['App', 'regch', x.join('').inspect] 
                  | "(" expr:x ")"                                      ->  x 
@@ -74,7 +75,7 @@ ometa OMetaParser <: OMeta {
                  | spaces tsString
 
   rule           = &(ruleName:n) -> @locals = []; @arrays = []
-                     rulePart(n):x (ruleSep rulePart(n))*:xs           ->  ['Rule', n, @locals,@arrays, ['Or', x, *xs]] 
+                     rulePart(n):x (ruleSep rulePart(n))*:xs           ->  ['Rule', n, @locals.uniq,@arrays.uniq, ['Or', x, *xs]] 
 
   rulePart :rn   = ruleName:n &{n == rn} expr4:b1 ( "=" expr:b2        ->  ['And', b1, b2] 
                                                   | empty              ->  b1 
@@ -84,5 +85,5 @@ ometa OMetaParser <: OMeta {
                    ( "<:" name | empty -> { 'OMeta' }):sn
                    "{" listOf("rule", "ruleSep"):rs "}"                  ->  ['Grammar', n, sn, *rs]
 
-	ruleSep = ","
+  ruleSep = ","
 }
