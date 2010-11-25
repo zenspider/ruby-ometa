@@ -387,15 +387,15 @@ _or(proc { _apply("nameFirst") }, proc { _apply("digit") })
 end
 
 def className
-xs = nil
 
-(xs = _applyWithArgs("firstAndRest", "upper","nameRest");leterize(xs.join('')))
+xs = []
+(_append(xs , _apply("upper"));_append(xs , _xmany { _apply("nameRest") });leterize(xs.join('')))
 end
 
 def tsName
-xs = nil
 
-(xs = _applyWithArgs("firstAndRest", "nameFirst","nameRest");leterize(xs.join('')) )
+xs = []
+(_append(xs , _apply("nameFirst"));_append(xs , _xmany { _apply("nameRest") });leterize(xs.join('')) )
 end
 
 def name
@@ -476,16 +476,10 @@ klas = rule = as = nil
 _or(proc { (klas = _apply("name");_applyWithArgs("token", "::");rule = _apply("name");as = _apply("args");['App', 'foreign',klas,rule.inspect, *as] ) }, proc { (rule = _apply("name");as = _apply("args");['App', rule, *as] ) })
 end
 
-def or
-
-
-_applyWithArgs("token", "|")
-end
-
 def expr
 xs = nil
 
-(xs = _applyWithArgs("listOf", "expr4", "or");(xs.size==1 ? xs[0] : ['Or',        *xs] ))
+(xs = _applyWithArgs("listOf", "expr4", proc { _applyWithArgs("token", "|") });(xs.size==1 ? xs[0] : ['Or',        *xs] ))
 end
 
 def expr4
@@ -533,7 +527,7 @@ end
 def rule
 n = x = xs = nil
 
-(_xlookahead { n = _apply("ruleName") };@locals = []; @arrays = [];x = _applyWithArgs("rulePart", n);xs = _xmany { (_apply("ruleSep");_applyWithArgs("rulePart", n)) };['Rule', n, @locals.uniq,@arrays.uniq, ['Or', x, *xs]] )
+(_xlookahead { n = _apply("ruleName") };@locals = []; @arrays = [];x = _applyWithArgs("rulePart", n);xs = _xmany { (_applyWithArgs("token", ",");_applyWithArgs("rulePart", n)) };['Rule', n, @locals.uniq,@arrays.uniq, ['Or', x, *xs]] )
 end
 
 def rulePart
@@ -545,13 +539,7 @@ end
 def grammar
 n = sn = rs = nil
 
-(_applyWithArgs("keyword", "ometa");n = _apply("name");sn = _or(proc { (_applyWithArgs("token", "<:");_apply("name")) }, proc { (_apply("empty"); 'OMeta' ) });_applyWithArgs("token", "{");rs = _applyWithArgs("listOf", "rule", "ruleSep");_applyWithArgs("token", "}");['Grammar', n, sn, *rs])
-end
-
-def ruleSep
-
-
-_applyWithArgs("token", ",")
+(_applyWithArgs("keyword", "ometa");n = _apply("name");sn = _or(proc { (_applyWithArgs("token", "<:");_apply("name")) }, proc { (_apply("empty"); 'OMeta' ) });_applyWithArgs("token", "{");rs = _applyWithArgs("listOf", "rule", proc { _applyWithArgs("token", ",") });_applyWithArgs("token", "}");['Grammar', n, sn, *rs])
 end
 end
 
