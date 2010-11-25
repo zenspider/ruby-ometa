@@ -101,7 +101,7 @@ end
 def word
 
 
-_or(proc { _apply("alpha") }, proc { _applyWithArgs("exactly", "_") })
+_or(proc { _apply("alpha") }, proc { _applyWithArgs("seq", "_") })
 end
 
 def exactly
@@ -254,7 +254,7 @@ OMetaOptimizer = Class.new(OMeta) do
 def optimizeGrammar
 n = sn = rs = nil
 
-(_xform { (_applyWithArgs("exactly", "Grammar");n = _apply("anything");sn = _apply("anything");rs = _xmany { _apply("optimizeRule") }) }; ['Grammar', n, sn, *rs] )
+(_xform { (_applyWithArgs("seq", "Grammar");n = _apply("anything");sn = _apply("anything");rs = _xmany { _apply("optimizeRule") }) }; ['Grammar', n, sn, *rs] )
 end
 
 def optimizeRule
@@ -269,19 +269,19 @@ BSRubyParser = Class.new(OMeta) do
 def eChar
 c = nil
 
-_or(proc { (_applyWithArgs("exactly", "\\");c = _apply("char"); unescapeChar c ) }, proc { _apply("char") })
+_or(proc { (_applyWithArgs("seq", "\\");c = _apply("char"); unescapeChar c ) }, proc { _apply("char") })
 end
 
 def tsString
 xs = nil
 
-(_applyWithArgs("exactly", "'");xs = _xmany { (_xnot { _applyWithArgs("exactly", "'") };_apply("eChar")) };_applyWithArgs("exactly", "'"); xs.join('') )
+(_applyWithArgs("seq", "'");xs = _xmany { (_xnot { _applyWithArgs("seq", "'") };_apply("eChar")) };_applyWithArgs("seq", "'"); xs.join('') )
 end
 
 def nonBraChar
 
 
-(_xnot { _applyWithArgs("exactly", "(") };_xnot { _applyWithArgs("exactly", ")") };_apply("char"))
+(_xnot { _applyWithArgs("seq", "(") };_xnot { _applyWithArgs("seq", ")") };_apply("char"))
 end
 
 def insideBra
@@ -293,13 +293,13 @@ end
 def innerBra
 xs = nil
 
-(_applyWithArgs("exactly", "(");xs = _xmany { _apply("insideBra") };_applyWithArgs("exactly", ")");"("+xs*"" +")" )
+(_applyWithArgs("seq", "(");xs = _xmany { _apply("insideBra") };_applyWithArgs("seq", ")");"("+xs*"" +")" )
 end
 
 def outerBra
 xs = nil
 
-(_applyWithArgs("exactly", "(");xs = _xmany { _apply("insideBra") };_applyWithArgs("exactly", ")"); [ xs] )
+(_applyWithArgs("seq", "(");xs = _xmany { _apply("insideBra") };_applyWithArgs("seq", ")"); [ xs] )
 end
 
 def expr
@@ -317,7 +317,7 @@ end
 def nonBraceChar
 
 
-(_xnot { _applyWithArgs("exactly", "{") };_xnot { _applyWithArgs("exactly", "}") };_apply("char"))
+(_xnot { _applyWithArgs("seq", "{") };_xnot { _applyWithArgs("seq", "}") };_apply("char"))
 end
 
 def inside
@@ -329,13 +329,13 @@ end
 def innerBraces
 xs = nil
 
-(_applyWithArgs("exactly", "{");xs = _xmany { _apply("inside") };_applyWithArgs("exactly", "}"); "{#{xs.join('')}}" )
+(_applyWithArgs("seq", "{");xs = _xmany { _apply("inside") };_applyWithArgs("seq", "}"); "{#{xs.join('')}}" )
 end
 
 def outerBraces
 xs = nil
 
-(_applyWithArgs("exactly", "{");xs = _xmany { _apply("inside") };_applyWithArgs("exactly", "}"); xs.join('') )
+(_applyWithArgs("seq", "{");xs = _xmany { _apply("inside") };_applyWithArgs("seq", "}"); xs.join('') )
 end
 
 def semAction2
@@ -353,7 +353,7 @@ end
 def omproc
 x = nil
 
-(_applyWithArgs("exactly", "`");x = _applyWithArgs("foreign", OMetaParser, "expr");_applyWithArgs("exactly", "`");x)
+(_applyWithArgs("seq", "`");x = _applyWithArgs("foreign", OMetaParser, "expr");_applyWithArgs("seq", "`");x)
 end
 end
 
@@ -395,37 +395,37 @@ end
 def eChar
 c = nil
 
-_or(proc { (_applyWithArgs("exactly", "\\");c = _apply("char");unescapeChar c ) }, proc { _apply("char") })
+_or(proc { (_applyWithArgs("seq", "\\");c = _apply("char");unescapeChar c ) }, proc { _apply("char") })
 end
 
 def tsString
 xs = nil
 
-(_applyWithArgs("exactly", "'");xs = _xmany { (_xnot { _applyWithArgs("exactly", "'") };_apply("eChar")) };_applyWithArgs("exactly", "'");xs.join('') )
+(_applyWithArgs("seq", "'");xs = _xmany { (_xnot { _applyWithArgs("seq", "'") };_apply("eChar")) };_applyWithArgs("seq", "'");xs.join('') )
 end
 
 def characters
-xs = nil
+s = nil
 
-(_applyWithArgs("exactly", "'");_applyWithArgs("exactly", "'");xs = _xmany { (_xnot { (_applyWithArgs("exactly", "'");_applyWithArgs("exactly", "'")) };_apply("eChar")) };_applyWithArgs("exactly", "'");_applyWithArgs("exactly", "'");['App', 'seq',     xs.join('').inspect] )
+(s = _apply("tsString");['App', 'seq',     s.inspect] )
 end
 
 def sCharacters
 xs = nil
 
-(_applyWithArgs("exactly", "\"");xs = _xmany { (_xnot { _applyWithArgs("exactly", "\"") };_apply("eChar")) };_applyWithArgs("exactly", "\"");['App', 'token',   xs.join('').inspect] )
+(_applyWithArgs("seq", "\"");xs = _xmany { (_xnot { _applyWithArgs("seq", "\"") };_apply("eChar")) };_applyWithArgs("seq", "\"");['App', 'token',   xs.join('').inspect] )
 end
 
 def string
 xs = nil
 
-(xs = _or(proc { (_applyWithArgs("exactly", "#");_apply("tsName")) }, proc { _apply("tsString") });['App', 'exactly', xs.inspect] )
+(xs = (_applyWithArgs("seq", "#");_apply("tsName"));['App', 'exactly', xs.inspect] )
 end
 
 def number
 sign = ds = nil
 
-(sign = _or(proc { _applyWithArgs("exactly", "-") }, proc { (_apply("empty"); '' ) });ds = _xmany1 { _apply("digit") };['App', 'exactly', sign + ds.join('')] )
+(sign = _or(proc { _applyWithArgs("seq", "-") }, proc { (_apply("empty"); '' ) });ds = _xmany1 { _apply("digit") };['App', 'exactly', sign + ds.join('')] )
 end
 
 def keyword
@@ -491,7 +491,7 @@ end
 def binding
 x = n = e = nil
 
-(x = _apply("anything");_or(proc { (_applyWithArgs("exactly", ":");n = _apply("name");_or(proc { (_applyWithArgs("exactly", "[");_applyWithArgs("exactly", "]");@arrays << n; ['Append', n, x] ) }, proc { (_apply("empty");@locals << n; ['Set', n, x]) })) }, proc { (_applyWithArgs("exactly", ":");e = _apply("inlineHostExpr");@locals << "it";  ['And',['Set','it',x],['Pred',e]]) }))
+(x = _apply("anything");_or(proc { (_applyWithArgs("seq", ":");n = _apply("name");_or(proc { (_applyWithArgs("seq", "[");_applyWithArgs("seq", "]");@arrays << n; ['Append', n, x] ) }, proc { (_apply("empty");@locals << n; ['Set', n, x]) })) }, proc { (_applyWithArgs("seq", ":");e = _apply("inlineHostExpr");@locals << "it";  ['And',['Set','it',x],['Pred',e]]) }))
 end
 
 def expr3
@@ -554,7 +554,7 @@ end
 def App
 args = rule = args = rule = nil
 
-_or(proc { (_applyWithArgs("exactly", "super");args = _xmany1 { _apply("arg") }; "_superApplyWithArgs(#{args*", "})" ) }, proc { (rule = _apply("anything");args = _xmany1 { _apply("arg") }; "_applyWithArgs(#{rule.inspect}, #{args*", "})" ) }, proc { (rule = _apply("anything"); "_apply(#{rule.inspect})" ) })
+_or(proc { (_applyWithArgs("seq", "super");args = _xmany1 { _apply("arg") }; "_superApplyWithArgs(#{args*", "})" ) }, proc { (rule = _apply("anything");args = _xmany1 { _apply("arg") }; "_applyWithArgs(#{rule.inspect}, #{args*", "})" ) }, proc { (rule = _apply("anything"); "_apply(#{rule.inspect})" ) })
 end
 
 def arg
