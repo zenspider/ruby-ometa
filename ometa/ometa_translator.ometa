@@ -18,7 +18,7 @@ ometa RubyOMetaTranslator {
   Many  trans:x                    =   -> { "_xmany { #{x} }" },
 	Many1 trans:x                    =   -> { "_xmany1 { #{x} }" },
   Set   :n trans:v                 =   -> { "#{n} = #{v}" },
-  Append :n trans:v								 = 	 -> { "#{n} << #{v}" },
+  Append :n trans:v								 = 	 -> { "_append(#{n} , #{v})" },
 	Not   trans:x                    =   -> { "_xnot { #{x} }" },
   Lookahead trans:x                =   -> { "_xlookahead { #{x} }" },
   Form  trans:x                    =   -> { "_xform { #{x} }" },

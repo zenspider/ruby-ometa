@@ -340,7 +340,13 @@ class OMetaCore
 		)
 		xs
 	end
-
+	def _append(ar,it)
+		if it.is_a? Array
+			ar.concat(it) 
+		else
+			ar << it
+		end
+	end
   def initialize(input)
     @input = input
     initialize_hook
