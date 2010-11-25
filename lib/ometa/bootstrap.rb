@@ -626,7 +626,7 @@ end
 def Append
 n = v = nil
 
-(n = _apply("anything");v = _apply("trans"); "#{n} << #{v}" )
+(n = _apply("anything");v = _apply("trans"); "_append(#{n} , #{v})" )
 end
 
 def Not
