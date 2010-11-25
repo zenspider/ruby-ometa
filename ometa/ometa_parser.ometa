@@ -13,11 +13,11 @@ ometa OMetaParser <: OMeta {
 
   tsString       = '\'' (~'\'' eChar)*:xs '\''                         ->  xs.join('') 
 
-  characters     = '\'' '\'' (~('\'' '\'') eChar)*:xs '\'' '\''          ->  ['App', 'seq',     xs.join('').inspect] 
+  characters     = tsString:s          ->  ['App', 'seq',     s.inspect] 
 
   sCharacters    = '"'     (~'"'         eChar)*:xs '"'                ->  ['App', 'token',   xs.join('').inspect] 
 
-  string         = ('#' tsName | tsString):xs                  ->  ['App', 'exactly', xs.inspect] 
+  string         = ('#' tsName):xs                  ->  ['App', 'exactly', xs.inspect] 
 
   number         = ('-' | empty -> { '' }):sign digit+:ds              ->  ['App', 'exactly', sign + ds.join('')] 
 
