@@ -5,6 +5,13 @@ class Fail < StandardError
   attr_accessor :failPos
 end
 
+class Klass
+	attr_accessor :name,:args
+	def initialize(nam,arg)
+		@name=nam;@args=arg
+	end
+end
+
 class Character < String
   undef_method :each if ''.respond_to?(:each)
 
@@ -43,7 +50,8 @@ class Character < String
 end
 
 class Stream
-  def copy
+  attr_reader :src,:stream
+	def copy
     self
   end
 end
@@ -60,6 +68,7 @@ class ReadStream < Stream
   end
 
   def eof?
+		return true unless @src.respond_to? :length
     @pos >= @src.length
   end
 
@@ -274,13 +283,14 @@ class OMetaCore
   def _xmany1(&block)
     _xmany block.call, &block
   end
-	def _key(key,&block)
+	def _key(key,block)
 		oldInput = @input
-		src=@input.instance_variable_get("@#{key}")
-		v=src.call(key) if src.respond_to? key
+		src=@input.stream.src
+		v=src.instance_variable_get("@#{key}")
+		v||=src.call(key) if src.respond_to? key
 		v||=src[key] if src.respond_to? "[]"
-		@input = LazyStream.new UNDEFINED, UNDEFINED, ReadStream.new(v)
-		r =yield
+		@input = LazyStream.new UNDEFINED, UNDEFINED, ReadStream.new([v])
+		r =block.call
 		_apply "end"
 		@input = oldInput
 		r
@@ -288,7 +298,6 @@ class OMetaCore
 
   def _xform
     v = _apply "anything"
-    raise Fail unless v.respond_to? :each
     oldInput = @input
     @input = LazyStream.new UNDEFINED, UNDEFINED, ReadStream.new(v)
     r = yield

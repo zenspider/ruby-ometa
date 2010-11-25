@@ -58,16 +58,18 @@ ometa OMetaParser <: OMeta {
                  | "&" ~inlineHostExpr expr1:x                         ->  ['Lookahead',   x] 
                  | expr1
 
-  expr1          = application
+  expr1          =spaces className:c '[' expr:x "]"                            ->  ['Form',['And', ['App',"clas",c.inspect]  ,x]]
+								 |application
                  | "@" name:var ("=>" application  | empty -> {['App',"anything"]}):x  ->  ['Key',  var,   x]
                  | "->" atomicHostExpr:x                       ->  ['Act',         x]
                  | "&"  inlineHostExpr:x                       ->  ['Pred',        x]
                  | spaces (characters | sCharacters | string | number)
                  | "[" expr:x "]"                                      ->  ['Form', x]
-                 | "%" (className | empty ->{"Array"}):c '[' args:a "]" -> ['Klass',c,e]
-                 | className:c '[' expr:x "]"                            ->  ['Form',['And', ['App',"clas",c]  ,x]]
+                 | "%" (className | empty ->{"Array"}):c '[' klasargs:args "]" -> Klass.new(c,args)
                  | "<" (~">" eChar)+:x  ">"                            ->  ['App', 'regch', x.join('').inspect] 
                  | "(" expr:x ")"                                      ->  x 
+
+	klasargs = <^\]>*:a -> a*""
 
   ruleName       = name
                  | spaces tsString
