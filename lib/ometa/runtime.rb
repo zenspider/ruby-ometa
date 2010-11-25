@@ -305,7 +305,12 @@ class OMetaCore
   end
 
 	def apply
-    _apply _apply('anything')
+    p=_apply('anything')
+		if p.is_a? Proc
+			p.call
+		else
+			_apply p
+		end
   end
 
   def foreign

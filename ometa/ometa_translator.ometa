@@ -23,7 +23,7 @@ ometa RubyOMetaTranslator {
   Lookahead trans:x                =   -> { "_xlookahead { #{x} }" },
   Form  trans:x                    =   -> { "_xform { #{x} }" },
   Key		:name transFn:x							 =   -> {	"_key(#{name.inspect},#{x})"	},
-	Rule  :name locals:ls arrays:ars trans:body =   -> { "def #{name}\n#{ls}\n#{body}\nend\n" },
+	Rule  :name locals:ls arrays:ars trans:body =   -> { "def #{name}\n#{ls}\n#{ars}\n#{body}\nend\n" },
   Grammar :name :sName
           trans*:rules             =   -> { "Class.new(#{sName}) do\n@name = #{name.inspect}\n#{rules * "\n"}end" },
   locals  = [anything+:vs]            -> { vs.map { |v| "#{v} = " }.join('') + 'nil' }
