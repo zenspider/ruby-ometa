@@ -14,6 +14,14 @@ task :bootstrap do
   end
 end
 
+desc 'create new standard'
+task :standard do
+	commit=`git rev-parse --short HEAD`.strip
+	mkdir "standards/#{commit}"
+	cp "lib/ometa/bootstrap.rb","standards/#{commit}"
+end
+
+
 desc "basic bootstrap profiling"
 task :profile do
   sh 'zenprofile -Ilib -rometa -e "Bootstrapper.to_ruby(OMeta::GRAMMAR_FILES)"'
@@ -21,6 +29,7 @@ end
 
 desc 'Simple benchmark'
 task :bench do
+	require 'profile'
   # all we do is run the complete bootstrap 3 times.  this currently
   # takes about 44-48 seconds currently on my laptop (~1.4Ghz single
   # core).  they're pretty simple grammars, so ideally this'd take
@@ -36,8 +45,8 @@ task :bench do
   # the _apply function etc.  just tested it on ruby1.9, and the speed
   # was the same.
   t = Time.now
-  3.times { Bootstrapper.to_ruby(OMeta::GRAMMAR_FILES) }
-  puts "3 bootstraps took #{Time.now - t} seconds"
+  1.times { Bootstrapper.to_ruby(OMeta::GRAMMAR_FILES) }
+  puts "1 bootstraps took #{Time.now - t} seconds"
 end
 
 Rake::TestTask.new do |t|

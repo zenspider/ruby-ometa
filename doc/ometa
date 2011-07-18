@@ -1,0 +1,47 @@
+We did following additions versus ometa
+
+rules can be separated by empty line
+
+We added ? operator
+
+Foreign rules can be called as Grammar::rule
+
+To describe set of characters use <re> which is equivalent to regexp /[re]/
+
+variable binding
+You can store result by suffixing it by :variable
+To collect results into array add [] after variable
+plus= mul:m[] ( '+' mul:m[]) -> m 
+
+Function call almost directly translates to ruby call.
+You can pass ometa expression as argument provided its enclosed in ``
+You can use parametrized rules listOf(`foo`,`bar|baz`)
+
+
+planned
+
+Parsing general objects
+
+You can parse arbitrary object by using
+
+@key=>rule
+let c be current object. It look for values c.key , c.instance_variable_get(key), c['key']
+and if succeeds it tries to match result by rule
+
+Add nice api to load grammars
+
+standards
+
+Here I try my idea of standards. To parse file with certain grammar add first line
+#standard git-commit-number
+TODO 
+nicer version numbers
+
+ometa2ometa
+tool whose purposes are
+	-formater
+	-migration if file is in some standard and you want newer you can migrate it by 
+   ometa2ometa
+
+
+

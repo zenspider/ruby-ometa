@@ -1,0 +1,50 @@
+ometa OMeta <: OMetaCore{
+  . = anything
+
+  regch :regex = char:c &{Regexp.new("[#{regex}]").match(c)} -> c
+	
+  end= ~.
+
+	empty = -> true
+	
+  endline=  ("\r" "\n" ) | "\r" | "\n"
+	
+  char= .:c &{Character === c } -> c
+
+	space=<\s\t\r\n\f>
+
+	spaces=space* 
+
+	digit=<0-9>
+
+	lower=<a-z>
+
+	upper=<A-Z>
+		
+  letter=lower | upper
+
+	letterOrDigit=letter | digit
+	
+	alpha = letter
+
+	alnum = letterOrDigit
+
+	xdigit = <0-9a-fA-F>
+
+	word = alpha | '_'
+
+	exactly :wanted = :got -> wanted == got ? wanted : (raise Fail)
+
+	notLast :rule = apply(rule):r &apply(rule) -> r
+
+	token :cs = spaces seq(cs)
+
+	firstAndRest :first :rest = apply(first):f apply(rest)*:r -> r.unshift(f)
+
+	listOf :rule :delim =  apply(rule):f (apply(delim) apply(rule))*:r -> r.unshift(f)
+												 | empty -> []
+	
+	clas :cls = &{@input.stream.src.is_a? Class.const_get(cls)}	
+
+	foo= %Aue[]
+}
