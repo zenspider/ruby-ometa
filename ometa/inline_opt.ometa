@@ -12,8 +12,7 @@ ometa NullOptimizer {
   Not     =  trans:x              -> { ['Not',       x] },
   Lookahead= trans:x              -> { ['Lookahead', x] },
   Form     = trans:x              -> { ['Form',      x] },
-  Key			 = :name trans:x							-> { ['Key',name,			x] },
-	Rule     = :name :ls :ar trans:body -> { ['Rule', name, ls,ar, body] },
+  Rule     = :name :ls trans:body -> { ['Rule', name, ls, body] },
   initialize =                    -> { @_didSomething = false }
 }
 

@@ -1,3 +1,4 @@
+D=File.new("_debug.rb","w")
 module Bootstrapper
   module Annotation
     attr_accessor :source, :previous
@@ -44,10 +45,15 @@ module Bootstrapper
     sources = Array(files).collect do |glob|
       Dir[glob].collect do |filename|
         source    = IO.read(filename)
-        parsed    = parser.matchAllwith(source, 'grammar')
-        optimized = optimizer.matchwith(parsed, 'optimizeGrammar')
-        ruby      = translator.matchwith(optimized, 'trans')
+D.puts source
+			source = source.gsub(/\n\s*\n/,"\n,\n")
 
+				parsed    = parser.parsewith(source, 'grammar')
+D.puts parsed.inspect
+				optimized = optimizer.matchwith(parsed, 'optimizeGrammar')
+D.puts optimized.inspect
+        ruby      = translator.matchwith(optimized, 'trans')
+D.puts ruby
         # this hack remains at the moment...
         ruby.gsub! /initialize/, 'initialize_hook'
 
@@ -56,7 +62,6 @@ module Bootstrapper
 
         # that gives us its name
         name = klass.instance_variable_get(:@name)
-
         "#{name} = #{ruby}"
       end
     end

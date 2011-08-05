@@ -1,8 +1,160 @@
 = About
 
-Briefly what OMeta is, some links to the ometajs stuff.
+We describe ometa syntax on examples
+
+ometa Greet {
+	goodbye = "good"? "bye"
+						| "so long"
+	
+	hello = [hH] "ello" space+ ([wW] "orld" space+)*
+
+
+	grammar = (hello | goodbye):h -> ["Grammar", h.inspect]
+
+	token :w = seq(w)
+}
+
+ometa Greet {
+In first line we define grammar with name Greet
+A grammar consists of set of rules separated by empty line or comma.
+
+goodbye = "good"? "bye"
+This matches strings bye and goodbye. We match string in quotes literaly so "bye" matches bye.
+As in regular expresions ? in "good"? makes occurence of good voluntary. 
+Moreover appending * or + makes term repetable as in regular expressions
+
+| "so long"
+Or it could match so long. 
+Matching alternatives is deterministic so called ordered choice. If more alternatives can be matched we choose which was stated first.
+
+  hello = <hH> "ello" (space+ <wW> "orld")*
+<> corresponds to [] in regular expressions so <hH> "ello" matches hello and Hello.
+
+space is predefined function matching any whitespace character so space+ matches sequence of white spaces
+
+(space+ <wW> "orld")+
+As in regexp we can surround sequence by parenthness to group it to single term. Here we match strings like " world world  World	world"
+
+grammar = (hello | goodbye+):h -> ["Grammar", h.inspect]
+We define that our grammar can be rule hello or sequence of goodbyes
+:h assigns result of (hello | goodbye+) to variable h. 
+-> ["Grammar",h.inspect] Here we define result of rule grammar
+Result of rule is defined similarly as result of methods in ruby:
+result of sequence of rules is result of last rule
+result of a|b|c is result of matched alternative
+result of [pat] or "string" is matched character or string
+result of rule* ,rule+ is array or results of rules
+result of rule? is result of rule or nil
+
+token :s = seq(s)
+We cheated bit saying that "string" matches exactly strings because it by default matches string preceded by any whitespaces.
+We redefine token rule.
+This is parametrized rule. It takes as parameter string s and then calls parametrized rule seq which matches exactly string s.
+Notice that whitespace in parametrized rule call is forbidden and in grouping its mandatory.
+
+We advance to more advanced example
+assume we defined ruby class 
+
+class Tree <Ometa_Node
+	attr_accessor :left,:right
+end
+
+and ometa code
+
+ometa Greeter < Greet {
+	hello = "hel" .*
+	
+	times :n :r = -> n.times{r.call }
+
+	bye = times(3, `"cya" | "bye"`)
+
+	goodbye = bye | super
+
+	tree = #Tree:t "()" -> t
+								 | "(" tree:t.left ")" ->t
+                 | "(" tree:t.left tree:t.right ")" ->t
+
+	grammar = Greet::hello 
+						| tree
+						| ( <aA>?:s[] "hoy":s[] space+)+ -> s
+						| super
+}
+
+ometa Greeter < Greet {
+We define grammar Greeter which inherits from grammar greet
+  hello = "hel" .*
+We redefile hello rule
+
+  times :n :p = -> n.times{res=apply(p) };res
+This ruby code should match n times pattern p
+
+  bye = times(3, `"cya" | "bye"`)
+Using `pattern` in parametrized rule gives proc which matches given pattern. You could pass string "rule" as well if pattern is single rule.
+
+  goodbye = bye | super
+As in ruby super does matching by parent method.
+
+ grammar = Greet::hello 
+Greet::hello is example of foreign rule invocation. You can use rule from any grammar you define by Grammar::rule
+
+ | ( <aA>?:s[] "hoy":s[] )+ -> s
+A common problem is collect array of something.  A rule:a[] appends result of rule to array a (which is initialy empty array)
+
+  tree = #Tree:t "()" -> t
+                 | "(" tree:t.left ")" ->t
+                 | "(" tree:t.left tree:t.right ")" ->t
+
+
+Matching objects
+Ometa can match any objects not just stream of characters. Assume we have structure
+<Tree @size=3 @nodes={1=>[1,3],2=>[2,5] "a"=>[4,5]} >
+
+We can match it by grammar
+
+ometa Objects {
+	grammar = [tree]
+	
+	tree = @size=>integer:size @nodes=>nodes
+	
+	nodes = [ @a=>:a (@key=>:k @value=>values:v)* ]
+	
+	values = [ ->{s=0} (:x ->{s+=x})* ] -> s
+}
+
+	grammar = [tree]
+We use [] to go inside matched object. We go inside matched object and try match it by rule tree
+
+	tree = @size=>integer:size @nodes=>nodes
+When we are at object we access its content by syntax @name=>rule so we get size of tree by calling getter size and match content of variable @nodes with nodes rule.
+
+ nodes = [ @a=>:a (@key=>:k @value=>values:v)* ]
+Matching @name=>rule does following
+1. look if there is getter object.method (you can call any method by syntax @method(args)=>rule)
+2. look if object has method as instance variable
+3. look if what gives indexing  object[:method] or object["method"]
+
+For matching hashes we add keywords @key @value to match keys and values
+
+  values = [ ->{s=0} (:x ->{s+=x})* ] -> s
+We match array and sum its values.
+
+
+Standards
+
+
+
+look at doc/ometa
 
 = TODO
+
+* reporting of file position
+* error message should show begin of last infinite rule
+* error handler to access stack?
+* integrate @method so we can use [] also on ordinary objects
+* add formating capabilities for ometa2ometa
+* make parametrized rules application ordinary calls istead prefixing with arguments
+* add switch optimalization see pappy
+* add indirect recursion support
 
 * perhaps cache compiled rb files as "#{ometa_filename}.rb.cache" or
   similar, and use them based on mtime / flag combination.

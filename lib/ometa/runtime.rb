@@ -5,6 +5,13 @@ class Fail < StandardError
   attr_accessor :failPos
 end
 
+class Klass
+	attr_accessor :name,:args
+	def initialize(nam,arg)
+		@name=nam;@args=arg
+	end
+end
+
 class Character < String
   undef_method :each if ''.respond_to?(:each)
 
@@ -43,7 +50,8 @@ class Character < String
 end
 
 class Stream
-  def copy
+  attr_reader :src,:stream
+	def copy
     self
   end
 end
@@ -60,13 +68,13 @@ class ReadStream < Stream
   end
 
   def eof?
+		return true unless @src.respond_to? :length
     @pos >= @src.length
   end
 
   def next
-    @src[@pos]
-  ensure
     @pos += 1
+    @src[@pos-1]
   end
 end
 
@@ -160,47 +168,48 @@ end
 #// the OMeta "class" and basic functionality
 #// TODO: make apply support indirect left recursion
 
-class OMeta
+class OMetaCore
   attr_reader :input
 
   def _apply(rule)
     #p rule
     memoRec = @input.memo[rule]
-    if not memoRec then
-      oldInput = @input
-      lr = LeftRecursion.new
-      @input.memo[rule] = memoRec = lr
+		if not memoRec then
+			oldInput = @input
+			lr = LeftRecursion.new
+			@input.memo[rule] = memoRec = lr
 
-      # should these be copies too?
-      @input.memo[rule] = memoRec = { :ans => send(rule), :nextInput => @input }
+			# should these be copies too?
+			@input.memo[rule] = memoRec = [send(rule),  @input]
 
-      if lr.detected
-        sentinel = @input
-        while true
-          begin
-            @input = oldInput
-            ans = send rule
-            raise Fail if @input == sentinel
-            oldInput.memo[rule] = memoRec = { :ans => ans, :nextInput => @input}
-          rescue Fail
-            break
-          end
-        end
-      end
-    elsif LeftRecursion === memoRec
-      memoRec.detected = true
+			if lr.detected
+				sentinel = @input
+				while true
+					begin
+						@input = oldInput
+						ans = send rule
+						raise Fail if @input == sentinel
+						oldInput.memo[rule] = memoRec = [ ans,  @input]
+					rescue Fail
+						break
+					end
+				end
+			end
+		elsif LeftRecursion === memoRec
+			memoRec.detected = true
       raise Fail
     end
-    @input = memoRec[:nextInput]
-    return memoRec[:ans]
+    ans,@input = *memoRec
+    return ans
   end
 
   def _applyWithArgs(rule, *args)
-    #p :app_wit_arg => [rule, args]
-    args.reverse_each do |arg|
-      @input = LazyStream.new arg, @input, nil
-    end
-    send rule
+		oldInput = @input
+		args.reverse_each do |arg|
+			@input = LazyStream.new arg, @input, nil
+		end
+		send rule
+
   end
 
   def _superApplyWithArgs(rule, *args)
@@ -274,16 +283,27 @@ class OMeta
   def _xmany1(&block)
     _xmany block.call, &block
   end
+	def _key(key,block)
+		oldInput = @input
+		src=@input.stream.src
+		v=src.instance_variable_get("@#{key}")
+		v||=src.call(key) if src.respond_to? key
+		v||=src[key] if src.respond_to? "[]"
+		@input = LazyStream.new UNDEFINED, UNDEFINED, ReadStream.new([v])
+		r =block.call
+		_apply "end"
+		@input = oldInput
+		r
+	end
 
   def _xform
     v = _apply "anything"
-    raise Fail unless v.respond_to? :each
     oldInput = @input
     @input = LazyStream.new UNDEFINED, UNDEFINED, ReadStream.new(v)
     r = yield
     _apply "end"
     @input = oldInput
-    v
+    r
   end
 
   #// some basic rules
@@ -293,16 +313,13 @@ class OMeta
     return r
   end
 
-  def end
-    _xnot { _apply("anything") }
-  end
-
-  def empty
-    return true
-  end
-
-  def apply
-    _apply _apply('anything')
+	def apply
+    p=_apply('anything')
+		if p.is_a? Proc
+			p.call
+		else
+			_apply p
+		end
   end
 
   def foreign
@@ -317,82 +334,28 @@ class OMeta
   end
 
   #//  some useful "derived" rules
-  def exactly
-    wanted = _apply("anything")
-    if wanted == _apply("anything")
-      return wanted
-    end
-    raise Fail #throw :fail, true
-  end
-
-  def char
-    r = _apply("anything")
-    _pred(Character === r)
-    return r
-  end
-
-  def space
-    r = _apply("char")
-    _pred(r[0] <= 32)
-    return r
-  end
-
-  def spaces
-    _xmany { _apply("space") }
-  end
-
-  def digit
-    r = _apply("char")
-    _pred(r =~ /[0-9]/)
-    return r
-  end
-
-  def lower
-    r = _apply("char")
-    _pred(r =~ /[a-z]/)
-    return r
-  end
-
-  def upper
-    r = _apply("char")
-    _pred(r =~ /[A-Z]/)
-    return r
-  end
-
-  def letter
-    _or(
-        proc { _apply 'lower' },
-        proc { _apply 'upper' })
-  end
-
-  def letterOrDigit
-    _or(
-        proc { _apply 'letter' },
-        proc { _apply 'digit' })
-  end
-
-  def firstAndRest
-    first = _apply 'anything'
-    rest = _apply 'anything'
-    _xmany(_apply(first)) { _apply rest }
-  end
 
   def seq
     xs = _apply 'anything'
-    if String === xs
-      xs = Character::StringWrapper.new xs
-    end
-    xs.each { |obj| _applyWithArgs 'exactly', obj }
-    xs
-  end
-
-  def notLast
-    rule = _apply("anything")
-    r    = _apply(rule)
-    _xlookahead { _apply(rule) }
-    return r
-  end
-
+		_or(
+			proc{
+				_applyWithArgs('exactly',xs)
+			}	, proc{
+				if String === xs
+					xs = Character::StringWrapper.new xs
+				end
+				xs.each { |obj| _applyWithArgs 'exactly', obj }
+			}
+		)
+		xs
+	end
+	def _append(ar,it)
+		if it.is_a? Array
+			ar.concat(it) 
+		else
+			ar << it
+		end
+	end
   def initialize(input)
     @input = input
     initialize_hook
@@ -431,26 +394,6 @@ class OMeta
 
   # ----
 
-  def listOf
-    rule  = _apply("anything")
-    delim = _apply("anything")
-    _or(proc {
-          r = _apply(rule)
-          _xmany(r) {
-            _applyWithArgs("token", delim)
-            _apply(rule)
-          }
-        },
-        proc { [] }
-        )
-  end
-
-  def token
-    cs = _apply("anything")
-    _apply("spaces")
-    return _applyWithArgs("seq", cs)
-  end
-
   def parse
     rule = _apply("anything"),
     ans  = _apply(rule)
@@ -478,16 +421,7 @@ class OMeta
     end
   end
 
-  ESCAPE_LOOKUP = {
-    'n' => "\n",
-    't' => "\t",
-    'r' => "\r",
-    '\'' => "'",
-    '\"' => '"',
-    '\\' => '\\'
-  }
-
   def unescapeChar c
-    ESCAPE_LOOKUP[c] or raise NotImplementedError
+		eval ("\"\\"+c+"\"")
   end
 end
